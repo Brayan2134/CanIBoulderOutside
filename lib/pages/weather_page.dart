@@ -53,11 +53,33 @@ class _WeatherPageState extends State<WeatherPage>{
       body: Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center,
           children: [
-          // City Name
-          Text(_weather?.cityName ?? "Loading city..."),
+            // City Name
+            Text(_weather?.cityName ?? "Loading city..."),
 
-          // temperature
-          Text('${_weather?.temperature.round()}"C"'),
+            // Current temperature
+            Text('${_weather?.temperature.round()}\u2109 right now'),
+
+            // High temperature
+            Text('${_weather?.tempMax.round()}\u2109 high today'),
+
+            // Low temperature
+            Text('${_weather?.tempMin.round()}\u2109 low today'),
+
+            // Wind speed
+            Text('${_weather?.windSpeed.round()} mph wind speed'),
+
+            // Sandstone cond.
+            const Text("Sandstone rock conditions are: "),
+
+            // Conglomerate cond.
+            const Text("Conglomerate rock conditions are: "),
+
+            // Igneous cond.
+            const Text("Igneous rock conditions are: "),
+
+            // Metamorphic cond.
+            const Text("Metamorphic rock conditions are: "),
+
           ],
         ),
       )
