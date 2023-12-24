@@ -48,41 +48,127 @@ class _WeatherPageState extends State<WeatherPage>{
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
           children: [
-            // City Name
-            Text(_weather?.cityName ?? "Loading city..."),
 
-            // Current temperature
-            Text('${_weather?.temperature.round()}\u2109 right now'),
 
-            // High temperature
-            Text('${_weather?.tempMax.round()}\u2109 high today'),
+            Row(
+              children: [
 
-            // Low temperature
-            Text('${_weather?.tempMin.round()}\u2109 low today'),
+                // Current City
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text(_weather?.cityName ?? "Loading city..."),
+                ),
 
-            // Wind speed
-            Text('${_weather?.windSpeed.round()} mph wind speed'),
+                // Expanded widget to create space between city and temperature
+                Expanded(child: Container()),
 
-            // Sandstone cond.
-            const Text("Sandstone rock conditions are: "),
+                // Current temperature
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text('${_weather?.temperature.round()}\u2109 right now'),
+                ),
+              ],
+            ),
 
-            // Conglomerate cond.
-            const Text("Conglomerate rock conditions are: "),
 
-            // Igneous cond.
-            const Text("Igneous rock conditions are: "),
+            // Temperatures and wind speed
+            Row(
+              children: [
+                // High & Low temperature
+                Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      children: [
+                        Text('${_weather?.tempMax.round()}\u2109 high today'),
+                        Text('${_weather?.tempMin.round()}\u2109 low today')
+                      ],
+                    ),
+                ),
 
-            // Metamorphic cond.
-            const Text("Metamorphic rock conditions are: "),
+                // Expanded widget to create space between city and temperature
+                Expanded(child: Container()),
 
+                // Wind Speed
+                Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Text('${_weather?.windSpeed.round()} mph wind speed'),
+                ),
+              ],
+            ),
+
+
+            // Rock Conditions
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Container(
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Sandstone Rock Condition
+                          ExpansionTile(
+                            title: Text("Sandstone rock conditions"),
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Additional information here"),
+                              ),
+                            ],
+                          ),
+
+                          // Conglomerate Rock Condition
+                          ExpansionTile(
+                            title: Text("Conglomerate rock conditions"),
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Additional information here"),
+                              ),
+                            ],
+                          ),
+
+                          // Igneous Rock Condition
+                          ExpansionTile(
+                            title: Text("Igneous rock conditions"),
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Additional information here"),
+                              ),
+                            ],
+                          ),
+
+                          // Metamorphic Rock Condition
+                          ExpansionTile(
+                            title: Text("Metamorphic rock conditions"),
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Additional information here"),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
           ],
         ),
-      )
+      ),
     );
   }
+
+
+
 }
