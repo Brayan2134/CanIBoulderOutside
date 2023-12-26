@@ -11,7 +11,8 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   Search? _search;
-  final _searchService = SearchService(); // Replace with your actual search service
+  final _searchService = SearchService('AIzaSyAvM88VaGwlbJOnJesCbJo3FMyfS_4fFww'); // Replace with your actual API key
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -19,17 +20,98 @@ class _SearchPageState extends State<SearchPage> {
     // Initialize your data or perform any setup here
   }
 
+  // Function to perform the search
+  void _performSearch() async {
+    String query = _searchController.text.trim();
+
+    // Call your search service to get results based on the query
+    Search? searchResult = await _searchService.search(query);
+
+    // Update the UI with the search result
+    setState(() {
+      _search = searchResult;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Page'),
+        title: Text('Search Page'),
       ),
-      body: const Column(
+      body: Column(
         children: [
-          // Your search page UI components go here
-          Text("HelloWorld"),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _performSearch,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  children: [
+                    // Display search results or appropriate UI based on _search
+                    if (_search != null)
+                      Text('Search Result: ${_search!.result}'),
+                    // Add your search page UI components here
+
+                    // For example:
+                    // TextField(
+                    //   controller: _searchController,
+                    //   decoration: InputDecoration(labelText: 'Search'),
+                    // ),
+                    // ElevatedButton(
+                    //   onPressed: _performSearch,
+                    //   child: Text('Search'),
+                    // ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        currentIndex: 1, // Set the initial index to 1 for 'Search'
+        onTap: (index) {
+          // Handle navigation based on the selected index
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home');
+              break;
+            case 1:
+            // No need to navigate, already on the Search page
+              break;
+            case 2:
+              Navigator.pushReplacementNamed(context, '/settings');
+              break;
+          }
+        },
       ),
     );
   }
