@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/weather_page.dart';
+import 'pages/search_page.dart';
+import 'pages/settings_page.dart';
 
 
 void main() {
@@ -11,9 +13,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context){
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: WeatherPage(),
+      home: const WeatherPage(),
+      routes:{
+        '/home': (context) => const WeatherPage(),
+        '/search': (context) => const SearchPage(),
+        //'/settings': (context) => const SearchPage(), // Replace with your settings screen widget
+      }
     );
   }
 }

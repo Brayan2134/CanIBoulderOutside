@@ -231,8 +231,17 @@ class _WeatherPageState extends State<WeatherPage> {
         currentIndex: 0,
         onTap: (index) {
           // Handle navigation based on the selected index
-          // You can use a switch statement or if conditions to navigate
-          // For example, you can use Navigator.pushReplacementNamed for different screens
+          switch (index){
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushReplacementNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushReplacementNamed(context, '/settings');
+              break;
+          }
         },
       ),
     );
