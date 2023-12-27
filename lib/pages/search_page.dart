@@ -28,12 +28,16 @@ class _SearchPageState extends State<SearchPage> {
     // Call your search service to get results based on the query
     Search? searchResult = await _searchService.search(query);
 
-    // Navigate to the new HelloScreen
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const SearchResult(),
-    ));
+    // Check if the search result is not null
+    if (searchResult != null) {
+      // Navigate to the new SearchResult screen with the city name
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SearchResult(cityName: searchResult.result),
+      ));
+    } else {
+      // Handle the case where the search result is null (e.g., show an error message)
+    }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -5,7 +5,8 @@ import 'package:boulderconds/services/weather_services.dart';
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
 
 class SearchResult extends StatefulWidget {
-  const SearchResult({Key? key}) : super(key: key);
+  final String cityName;
+  const SearchResult({Key? key, required this.cityName}) : super(key: key);
 
   @override
   State<SearchResult> createState() => _SearchResultPageState();
@@ -17,10 +18,9 @@ class _SearchResultPageState extends State<SearchResult> {
   Weather? _weather;
 
   _fetchWeather() async {
-    String cityName = await _weatherService.getCurrentCity();
 
     try {
-      final weather = await _weatherService.getWeather(cityName);
+      final weather = await _weatherService.getWeather(widget.cityName);
       setState(() {
         _weather = weather;
       });
@@ -39,7 +39,7 @@ class _SearchResultPageState extends State<SearchResult> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hello Screen'),
+        title: Text(widget.cityName),
       ),
       body: Column(
         children: [
@@ -216,41 +216,6 @@ class _SearchResultPageState extends State<SearchResult> {
         ],
       ),
 
-
-
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 0,
-        onTap: (index) {
-          // Handle navigation based on the selected index
-          switch (index){
-            case 0:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
-            case 1:
-              Navigator.pushReplacementNamed(context, '/search');
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/settings');
-              break;
-          }
-        },
-      ),
     );
   }
 }
