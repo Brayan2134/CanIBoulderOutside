@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/search_model.dart'; // Assuming you have a Search model
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
+import './search_result.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -27,10 +28,10 @@ class _SearchPageState extends State<SearchPage> {
     // Call your search service to get results based on the query
     Search? searchResult = await _searchService.search(query);
 
-    // Update the UI with the search result
-    setState(() {
-      _search = searchResult;
-    });
+    // Navigate to the new HelloScreen
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => const SearchResult(),
+    ));
   }
 
   @override
