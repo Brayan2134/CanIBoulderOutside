@@ -46,4 +46,46 @@ class WeatherService{
 
     return city ?? ""; // Return blank string if cannot get data
   }
+
+
+  Future<Map<String, bool>> checkRainPeriods(String cityName) async {
+    // OpenWeatherMap API endpoint for 5-day forecast (3-hour interval data)
+    String url = 'http://api.openweathermap.org/data/2.5/forecast?q=$cityName&appid=$apiKey';
+
+    Map<String, bool> rainPeriods = {
+      'last_36_hours': false,
+      '36_to_72_hours': false,
+      'over_72_hours': false
+    };
+
+    try {
+      var response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        for (var i = 0; i < data['list'].length; i++) {
+          var weather = data['list'][i]['weather'][0]['main'];
+          var dateTime = DateTime.parse(data['list'][i]['dt_txt']);
+
+          // Assuming the data is in chronological order
+          if (dateTime.isAfter(DateTime.now().subtract(Duration(hours: 36)))) {
+            if (weather == 'Rain') rainPeriods['last_36_hours'] = true;
+          } else if (dateTime.isBefore(DateTime.now().subtract(Duration(hours: 36))) &&
+              dateTime.isAfter(DateTime.now().subtract(Duration(hours: 72)))) {
+            if (weather == 'Rain') rainPeriods['36_to_72_hours'] = true;
+          } else {
+            if (weather == 'Rain') rainPeriods['over_72_hours'] = true;
+          }
+        }
+        return rainPeriods;
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+        return rainPeriods;
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      return rainPeriods;
+    }
+  }
 }

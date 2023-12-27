@@ -16,6 +16,8 @@ class SearchResult extends StatefulWidget {
 class _SearchResultPageState extends State<SearchResult> {
   final _weatherService = WeatherService("eeb0f7ab19f20666b209b9027da3fe9b");
   Weather? _weather;
+  Map<String, bool>? rainData;
+  bool isLoading = true;
 
   _fetchWeather() async {
 
@@ -29,11 +31,47 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
+  void loadRainData() async {
+    setState(() {
+      isLoading = true; // Set to true when starting to load data
+    });
+
+    try {
+      var data = await _weatherService.checkRainPeriods(widget.cityName);
+      setState(() {
+        rainData = data;
+        isLoading = false; // Set to false once data is loaded
+      });
+    } catch (e) {
+      print('An error occurred: $e');
+      setState(() {
+        isLoading = false; // Also set to false if there's an error
+      });
+      // Handle error state
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchWeather();
+    loadRainData();
   }
+
+
+  Widget _buildRainDataDisplay() {
+    if (rainData == null) {
+      return Text("Loading rain data...");
+    }
+    return Column(
+      children: [
+        Text('Last 36 hours: ${rainData!['last_36_hours']! ? 'Rained' : 'No Rain'}'),
+        Text('36 to 72 hours: ${rainData!['36_to_72_hours']! ? 'Rained' : 'No Rain'}'),
+        Text('Over 72 hours: ${rainData!['over_72_hours']! ? 'Rained' : 'No Rain'}'),
+      ],
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +126,9 @@ class _SearchResultPageState extends State<SearchResult> {
                         ),
                       ],
                     ),
+
+
+                    _buildRainDataDisplay(),
 
 
                     // Rock Conditions
