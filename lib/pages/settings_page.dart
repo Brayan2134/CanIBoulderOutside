@@ -8,10 +8,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
+  String currentUnit = 'Metric'; // Default value
+  final List<String> units = ['Imperial', 'Metric', 'Standard'];
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +17,43 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      // If you have additional content, add it here in the body.
-      body: const Center(
-        child: Text("Settings Page Content Goes Here"),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: Text(
+                "Unit Type",
+                style: TextStyle(fontSize: 16.0),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: DropdownButton<String>(
+                value: currentUnit,
+                icon: const Icon(Icons.arrow_downward),
+                elevation: 16,
+                style: const TextStyle(color: Colors.deepPurple),
+                underline: Container(
+                  height: 2,
+                  color: Colors.deepPurpleAccent,
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    currentUnit = newValue!;
+                  });
+                },
+                items: units.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -55,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
               break;
           }
         },
-      ),
+      ), // Your existing bottom navigation bar code
     );
   }
 }
