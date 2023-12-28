@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       routes:{
         '/home': (context) => const WeatherPage(),
         '/search': (context) => const SearchPage(),
-        //'/settings': (context) => const SearchPage(), // Replace with your settings screen widget
+        '/settings': (context) => const SettingsPage(), // Replace with your settings screen widget
       }
     );
   }
