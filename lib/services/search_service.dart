@@ -55,7 +55,24 @@ class SearchService {
     }
 
     return null; // Return null if city is not found or in case of any error
-
   }
+
+
+  Future<List<String>> fetchSuggestions(String input) async {
+    final request = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&types=(cities)&key=$apiKey';
+    final response = await http.get(Uri.parse(request));
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      if (result['status'] == 'OK') {
+        // Properly cast the map operation to return a List<String>
+        return (result['predictions'] as List)
+            .map<String>((p) => p['description'].toString())
+            .toList();
+      }
+    }
+    return []; // Return an empty list on failure
+  }
+
 
 }

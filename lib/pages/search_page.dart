@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/search_model.dart'; // Assuming you have a Search model
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
 import './search_result.dart';
-
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
 
@@ -14,30 +13,42 @@ class _SearchPageState extends State<SearchPage> {
   Search? _search;
   final _searchService = SearchService('AIzaSyAvM88VaGwlbJOnJesCbJo3FMyfS_4fFww'); // Replace with your actual API key
   TextEditingController _searchController = TextEditingController();
+  Future<List<String>> _suggestions = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    // Initialize your data or perform any setup here
+    _searchController.addListener(_onSearchChanged);
   }
 
-  // Function to perform the search
-  void _performSearch() async {
-    String query = _searchController.text.trim();
-
-    // Call your search service to get results based on the query
-    Search? searchResult = await _searchService.search(query);
-
-    // Check if the search result is not null
-    if (searchResult != null) {
-      // Navigate to the new SearchResult screen with the city name
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => SearchResult(cityName: searchResult.result),
-      ));
-    } else {
-      // Handle the case where the search result is null (e.g., show an error message)
+  void _onSearchChanged() {
+    if (_searchController.text.trim().isNotEmpty) {
+      setState(() {
+        _suggestions = _searchService.fetchSuggestions(_searchController.text.trim());
+      });
     }
   }
+
+  void _performSearch(String query) async {
+    try {
+      Search? searchResult = await _searchService.search(query);
+      print('Search result: ${searchResult?.result}'); // Debug statement
+
+      if (searchResult != null) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => SearchResult(cityName: searchResult.result),
+        ));
+      } else {
+        print('Search result is null'); // Debug statement
+        // Optionally, show a dialog or a snackbar to inform the user
+      }
+    } catch (e) {
+      print('Error during search: $e'); // Error handling
+      // Handle the error, maybe show a dialog or a snackbar
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,33 +65,34 @@ class _SearchPageState extends State<SearchPage> {
                 labelText: 'Search',
                 suffixIcon: IconButton(
                   icon: Icon(Icons.search),
-                  onPressed: _performSearch,
+                  onPressed: () => _performSearch(_searchController.text.trim()),
                 ),
               ),
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  children: [
-                    // Display search results or appropriate UI based on _search
-                    if (_search != null)
-                      Text('Search Result: ${_search!.result}'),
-                    // Add your search page UI components here
-
-                    // For example:
-                    // TextField(
-                    //   controller: _searchController,
-                    //   decoration: InputDecoration(labelText: 'Search'),
-                    // ),
-                    // ElevatedButton(
-                    //   onPressed: _performSearch,
-                    //   child: Text('Search'),
-                    // ),
-                  ],
-                ),
-              ),
+            child: FutureBuilder<List<String>>(
+              future: _suggestions,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(snapshot.data![index]),
+                        onTap: () {
+                          _searchController.text = snapshot.data![index];
+                          _performSearch(snapshot.data![index]);
+                        },
+                      );
+                    },
+                  );
+                }
+                return Center(child: Text('No suggestions found.'));
+              },
             ),
           ),
         ],
@@ -119,5 +131,12 @@ class _SearchPageState extends State<SearchPage> {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 }
