@@ -112,9 +112,38 @@ class _SearchResultPageState extends State<SearchResult> {
     );
   }
 
+
   Widget buildClimbingConditionTile(String rockType, String rockInfo) {
     String condition = getClimbingCondition(rockType);
     Color conditionColor = getConditionColor(condition);
+    List<TextSpan> coloredTextSpans(String text) {
+      const safeColor = Colors.green; // Color for "Safe"
+      const cautionColor = Colors.orange; // Color for "Caution"
+      const dontClimbColor = Colors.red; // Color for "Don't Climb"
+
+      RegExp exp = RegExp(r'Safe:|Caution:|Do not climb');
+      Iterable<RegExpMatch> matches = exp.allMatches(text);
+      int lastMatchEnd = 0;
+      List<TextSpan> spans = [];
+
+      for (var match in matches) {
+        if (match.start > lastMatchEnd) {
+          spans.add(TextSpan(text: text.substring(lastMatchEnd, match.start)));
+        }
+
+        Color color = match[0] == 'Safe:' ? safeColor
+            : match[0] == 'Caution:' ? cautionColor
+            : dontClimbColor;
+        spans.add(TextSpan(text: match[0], style: TextStyle(color: color)));
+        lastMatchEnd = match.end;
+      }
+
+      if (lastMatchEnd < text.length) {
+        spans.add(TextSpan(text: text.substring(lastMatchEnd)));
+      }
+
+      return spans;
+    }
 
     return ExpansionTile(
       title: Row(
@@ -127,7 +156,12 @@ class _SearchResultPageState extends State<SearchResult> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text("Info: $rockInfo"),
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(color: Colors.black), // Default text style
+              children: coloredTextSpans(rockInfo),
+            ),
+          ),
         ),
       ],
     );
