@@ -50,7 +50,6 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-
   // Add this function to determine the climbing condition
   String getClimbingCondition(String rockType) {
     if (rainData == null) {
@@ -77,7 +76,6 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-
   Color getConditionColor(String condition) {
     switch (condition) {
       case "Safe":
@@ -90,7 +88,6 @@ class _WeatherPageState extends State<WeatherPage> {
         return Colors.grey;
     }
   }
-
 
   @override
   void initState() {
@@ -118,6 +115,34 @@ class _WeatherPageState extends State<WeatherPage> {
   Widget buildClimbingConditionTile(String rockType, String rockInfo) {
     String condition = getClimbingCondition(rockType);
     Color conditionColor = getConditionColor(condition);
+    List<TextSpan> coloredTextSpans(String text) {
+      const safeColor = Colors.green; // Color for "Safe"
+      const cautionColor = Colors.orange; // Color for "Caution"
+      const dontClimbColor = Colors.red; // Color for "Don't Climb"
+
+      RegExp exp = RegExp(r'Safe:|Caution:|Do not climb');
+      Iterable<RegExpMatch> matches = exp.allMatches(text);
+      int lastMatchEnd = 0;
+      List<TextSpan> spans = [];
+
+      for (var match in matches) {
+        if (match.start > lastMatchEnd) {
+          spans.add(TextSpan(text: text.substring(lastMatchEnd, match.start)));
+        }
+
+        Color color = match[0] == 'Safe:' ? safeColor
+            : match[0] == 'Caution:' ? cautionColor
+            : dontClimbColor;
+        spans.add(TextSpan(text: match[0], style: TextStyle(color: color)));
+        lastMatchEnd = match.end;
+      }
+
+      if (lastMatchEnd < text.length) {
+        spans.add(TextSpan(text: text.substring(lastMatchEnd)));
+      }
+
+      return spans;
+    }
 
     return ExpansionTile(
       title: Row(
@@ -130,7 +155,12 @@ class _WeatherPageState extends State<WeatherPage> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text("Info: $rockInfo"),
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(color: Colors.black), // Default text style
+              children: coloredTextSpans(rockInfo),
+            ),
+          ),
         ),
       ],
     );
@@ -196,10 +226,14 @@ class _WeatherPageState extends State<WeatherPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Climbing conditions"),
-                                buildClimbingConditionTile("Sandstone", "Sandstone is a sedimentary rock composed of mainly sand that absorbs moisture easily when it rains.As a result, climbing this rock type while it's still wet or damp has the potential to ruin the holds (and possibly route).Please use best judgment prior to climbing.\n\nSafe: Dry rock, no rain in over 72 hours.\nCaution: Dry rock, no rain in the last 36-72 hours.\nDon't Climb: Wet rock (or/and) rain within the last 36 hours."),
-                                buildClimbingConditionTile("Conglomerate", "Conglomerate is a type of sedimentary rock that is comprised of rounded pebbles and sand. As a result, it's best to avoid climbing this rock type while the route is wet or damp. Furthermore, climbing wet routes leads to slippery and possible breaking of holds. \n\nSafe: Dry rock, no rain in the last 36-72 hours. \nCaution: Dry rock, no rain in the last 36 hours. \nDon't climb: Wet rock (and/or) rain in the last 36 hours."),
-                                buildClimbingConditionTile("Igneous", "Igneous rock is one of the three main rock types made in the earths mantle or crust. Some examples of Igneous rock include diorite, gabbro, granite, and pegmatite.They are generally safe to climb on as the rock doesn't absorb moisture well.Be advised that wet Igneous rock is moderately slippery.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
-                                buildClimbingConditionTile("Metamorphic", "Metamorphic rock is formed when existing rocks are banded together to create a new rock. Some examples of Metamorphic rock include gneiss, quartzite, marble, and soapstone. They are generally safe to climb on as the rock doesn't absorb moisture well.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
+                                buildClimbingConditionTile("Sandstone",
+                                    "Sandstone is a sedimentary rock composed of mainly sand that absorbs moisture easily when it rains.As a result, climbing this rock type while it's still wet or damp has the potential to ruin the holds (and possibly route).Please use best judgment prior to climbing.\n\nSafe: Dry rock, no rain in over 72 hours.\nCaution: Dry rock, no rain in the last 36-72 hours.\nDo not climb: Wet rock (or/and) rain within the last 36 hours."),
+                                buildClimbingConditionTile("Conglomerate",
+                                    "Conglomerate is a type of sedimentary rock that is comprised of rounded pebbles and sand. As a result, it's best to avoid climbing this rock type while the route is wet or damp. Furthermore, climbing wet routes leads to slippery and possible breaking of holds. \n\nSafe: Dry rock, no rain in the last 36-72 hours. \nCaution: Dry rock, no rain in the last 36 hours. \nDo not climb: Wet rock (and/or) rain in the last 36 hours."),
+                                buildClimbingConditionTile("Igneous",
+                                    "Igneous rock is one of the three main rock types made in the earths mantle or crust. Some examples of Igneous rock include diorite, gabbro, granite, and pegmatite.They are generally safe to climb on as the rock doesn't absorb moisture well.Be advised that wet Igneous rock is moderately slippery.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
+                                buildClimbingConditionTile("Metamorphic",
+                                    "Metamorphic rock is formed when existing rocks are banded together to create a new rock. Some examples of Metamorphic rock include gneiss, quartzite, marble, and soapstone. They are generally safe to climb on as the rock doesn't absorb moisture well.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
                               ],
                             ),
                           ),
@@ -213,8 +247,6 @@ class _WeatherPageState extends State<WeatherPage> {
           ),
         ],
       ),
-
-
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -235,7 +267,7 @@ class _WeatherPageState extends State<WeatherPage> {
         currentIndex: 0,
         onTap: (index) {
           // Handle navigation based on the selected index
-          switch (index){
+          switch (index) {
             case 0:
               Navigator.pushReplacementNamed(context, '/home');
               break;
