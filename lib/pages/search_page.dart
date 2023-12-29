@@ -52,48 +52,97 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Search Page'),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () => _performSearch(_searchController.text.trim()),
-                ),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.fromRGBO(24, 24, 24, 1),
+                  Color.fromRGBO(26, 29, 55, 1),
+                ],
               ),
             ),
           ),
-          Expanded(
-            child: FutureBuilder<List<String>>(
-              future: _suggestions,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(snapshot.data![index]),
-                        onTap: () {
-                          _searchController.text = snapshot.data![index];
-                          _performSearch(snapshot.data![index]);
-                        },
-                      );
+          Column(
+            children: <Widget>[
+              AppBar(
+                title: const Text(
+                  "Search Page",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white), // Change text color
+                  decoration: InputDecoration(
+                    labelText: 'Search',
+                    labelStyle: const TextStyle(color: Colors.white), // Change label text color
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.search, color: Colors.white), // Change icon color
+                      onPressed: () => _performSearch(_searchController.text.trim()),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: FutureBuilder<List<String>>(
+                    future: _suggestions,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4), // Add some margin between the items
+                              decoration: BoxDecoration(
+                                color: const Color.fromRGBO(80, 82, 94, 1), // Background color of the container
+                                borderRadius: BorderRadius.circular(10), // Optional: if you want rounded corners
+                              ),
+                              child: ListTile(
+                                title: Text(
+                                  snapshot.data![index],
+                                  style: const TextStyle(color: Colors.white), // Text color
+                                ),
+                                onTap: () {
+                                  _searchController.text = snapshot.data![index];
+                                  _performSearch(snapshot.data![index]);
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      }
+                      return const Center(child: Text(
+                        'No suggestions found.',
+                        style: TextStyle(color: Colors.white), // Text color
+                      ));
                     },
-                  );
-                }
-                return Center(child: Text('No suggestions found.'));
-              },
-            ),
+                  ),
+                ),
+              ),
+
+
+            ],
           ),
         ],
       ),
