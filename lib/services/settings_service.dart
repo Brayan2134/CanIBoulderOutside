@@ -1,20 +1,15 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class SettingsService {
-  // Private constructor
-  SettingsService._privateConstructor();
+  static const _unitKey = 'unitType'; // Key to store the unit type
 
-  // Singleton instance
-  static final SettingsService _instance = SettingsService._privateConstructor();
-
-  // Factory constructor to return the same instance
-  factory SettingsService() {
-    return _instance;
+  Future<void> updateUnitTypeFromSettings(String unitType) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_unitKey, unitType); // Save the unit type
   }
 
-  String _unitType = 'metric'; // Default unit type
-
-  String getCurrentUnitType() => _unitType;
-
-  void updateUnitTypeFromSettings(String unitType) {
-    _unitType = unitType;
+  Future<String> getCurrentUnitType() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_unitKey) ?? 'metric'; // Retrieve the unit type or default to 'metric'
   }
 }

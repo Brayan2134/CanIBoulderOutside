@@ -21,6 +21,19 @@ class _SettingsPageState extends State<SettingsPage> {
     settingsService.updateUnitTypeFromSettings(currentUnit);
   }
 
+  void _loadUnitType() async {
+    String savedUnit = await settingsService.getCurrentUnitType();
+    setState(() {
+      currentUnit = savedUnit == 'metric' ? 'Metric' : 'Imperial';
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnitType();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
