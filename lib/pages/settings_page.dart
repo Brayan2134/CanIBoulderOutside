@@ -14,46 +14,93 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Settings"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: Text(
-                "Unit Type",
-                style: TextStyle(fontSize: 16.0),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.fromRGBO(24, 24, 24, 1),
+                  Color.fromRGBO(26, 29, 55, 1),
+                ],
               ),
             ),
-            Expanded(
-              flex: 2,
-              child: DropdownButton<String>(
-                value: currentUnit,
-                icon: const Icon(Icons.arrow_downward),
-                elevation: 16,
-                style: const TextStyle(color: Colors.deepPurple),
-                underline: Container(
-                  height: 2,
-                  color: Colors.deepPurpleAccent,
+          ),
+
+          Column(
+            children: <Widget>[
+              AppBar(
+                title: const Text(
+                  "Settings",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    currentUnit = newValue!;
-                  });
-                },
-                items: units.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
               ),
-            ),
-          ],
-        ),
+
+              Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+
+                          // Add your "Unit Type" and DropdownButton here
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  "Unit Type",
+                                  style: TextStyle(fontSize: 16.0, color: Colors.white), // Adjust style as needed
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: DropdownButton<String>(
+                                  value: currentUnit,
+                                  icon: const Icon(Icons.arrow_downward, color: Colors.white),
+                                  elevation: 16,
+                                  style: const TextStyle(color: Colors.white),
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.deepPurpleAccent,
+                                  ),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      currentUnit = newValue!;
+                                    });
+                                  },
+                                  items: units.map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(
+                                            color: Colors.deepPurpleAccent,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -90,4 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ), // Your existing bottom navigation bar code
     );
   }
+
+
 }
