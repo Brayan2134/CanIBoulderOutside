@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/settings_service.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,6 +11,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   String currentUnit = 'Metric'; // Default value
   final List<String> units = ['Imperial', 'Metric'];
+  final SettingsService settingsService = SettingsService();
+
+  void _onUnitChanged(String newUnit) {
+    setState(() {
+      currentUnit = newUnit;
+    });
+    // Update the unit type in SettingsService
+    settingsService.updateUnitTypeFromSettings(currentUnit);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (String? newValue) {
                               setState(() {
                                 currentUnit = newValue!;
+                                _onUnitChanged(currentUnit);
                               });
                             },
                             items: units.map<DropdownMenuItem<String>>((String value) {
@@ -172,7 +183,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
-
 
 
   String getTemperatureScale() {

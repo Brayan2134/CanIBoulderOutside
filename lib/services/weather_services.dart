@@ -4,6 +4,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/weather_model.dart';
+import '../services/settings_service.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService{
@@ -14,7 +15,8 @@ class WeatherService{
   WeatherService(this.apiKey);
 
   Future<Weather> getWeather(String cityName) async{
-    final response = await http.get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=imperial'));
+    String unitType = SettingsService().getCurrentUnitType();
+    final response = await http.get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=$unitType'));
 
     if (response.statusCode == 200){
       return Weather.fromJson(jsonDecode(response.body));
