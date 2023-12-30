@@ -168,13 +168,13 @@ class _SearchPageState extends State<SearchPage> {
           // Handle navigation based on the selected index
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, '/home');
+              Navigator.pushNamed(context, '/home');
               break;
             case 1:
             // No need to navigate, already on the Search page
               break;
             case 2:
-              Navigator.pushReplacementNamed(context, '/settings');
+              Navigator.pushNamed(context, '/settings');
               break;
           }
         },

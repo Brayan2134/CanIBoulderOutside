@@ -19,6 +19,7 @@ class WeatherService{
     final response = await http.get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=$unitType'));
 
     if (response.statusCode == 200){
+      print("Weather has been fetched!");
       return Weather.fromJson(jsonDecode(response.body));
     }
     else{

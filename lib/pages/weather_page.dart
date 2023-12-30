@@ -16,6 +16,7 @@ class _WeatherPageState extends State<WeatherPage> {
   Map<String, bool>? rainData;
   bool isLoading = true;
   String _currentUnit = 'Metric'; // default value
+  DateTime? lastFetchTime;
 
   _fetchWeather() async {
     String cityName = await _weatherService.getCurrentCity();
@@ -91,25 +92,45 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadSettings();
-  }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _currentUnit = prefs.getString('unitType') ?? 'Metric';
-    });
+    String? savedUnit = prefs.getString('unitType');
+    String? savedFetchTimeString = prefs.getString('lastFetchTime');
+    lastFetchTime = savedFetchTimeString != null ? DateTime.parse(savedFetchTimeString) : null;
+
+    if (savedUnit != _currentUnit || lastFetchTime == null || DateTime.now().difference(lastFetchTime!) > Duration(hours: 1)) {
+      lastFetchTime = DateTime.now();
+      await prefs.setString('lastFetchTime', lastFetchTime!.toIso8601String());
+
+      setState(() {
+        _currentUnit = savedUnit ?? 'Metric';
+      });
+
+      _fetchWeather();
+      loadRainData();
+    }
+  }
+
+
+  void _conditionallyFetchWeather() async {
+    if (lastFetchTime == null || DateTime.now().difference(lastFetchTime!) > Duration(hours: 1)) {
+      await _fetchWeather();
+      lastFetchTime = DateTime.now();
+    }
+  }
+
+  void _conditionallyLoadRainData() async {
+    if (lastFetchTime == null || DateTime.now().difference(lastFetchTime!) > Duration(hours: 1)) {
+      loadRainData();
+      lastFetchTime = DateTime.now();
+    }
   }
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
-    _fetchWeather();
-    loadRainData(); // Add this line
   }
 
   Widget _buildRainDataDisplay() {
@@ -374,14 +395,11 @@ class _WeatherPageState extends State<WeatherPage> {
         onTap: (index) {
           // Handle navigation based on the selected index
           switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/search');
+              Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushReplacementNamed(context, '/settings');
+              Navigator.pushNamed(context, '/settings');
               break;
           }
         },
