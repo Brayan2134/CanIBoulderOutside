@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
 
@@ -14,6 +15,7 @@ class _WeatherPageState extends State<WeatherPage> {
   Weather? _weather;
   Map<String, bool>? rainData;
   bool isLoading = true;
+  String _currentUnit = 'Metric'; // default value
 
   _fetchWeather() async {
     String cityName = await _weatherService.getCurrentCity();
@@ -90,8 +92,22 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentUnit = prefs.getString('unitType') ?? 'Metric';
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
+    _loadSettings();
     _fetchWeather();
     loadRainData(); // Add this line
   }

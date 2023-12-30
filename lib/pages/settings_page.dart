@@ -18,7 +18,7 @@ class _SettingsPageState extends State<SettingsPage> {
       currentUnit = newUnit;
     });
     // Update the unit type in SettingsService
-    settingsService.updateUnitTypeFromSettings(currentUnit);
+    settingsService.updateUnitTypeFromSettings(currentUnit.toLowerCase());
   }
 
   void _loadUnitType() async {
