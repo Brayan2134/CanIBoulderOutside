@@ -52,7 +52,7 @@ class WeatherService{
 
   Future<Map<String, bool>> checkRainPeriods(String cityName) async {
     // OpenWeatherMap API endpoint for 5-day forecast (3-hour interval data)
-    String url = 'http://api.openweathermap.org/data/2.5/forecast?q=$cityName&appid=$apiKey';
+    String url = 'https://api.openweathermap.org/data/2.5/forecast?q=$cityName&appid=$apiKey';
 
     Map<String, bool> rainPeriods = {
       'last_36_hours': false,
@@ -70,13 +70,16 @@ class WeatherService{
           var weather = data['list'][i]['weather'][0]['main'];
           var dateTime = DateTime.parse(data['list'][i]['dt_txt']);
 
-          // Assuming the data is in chronological order
+          // Check if the time is within the last 36 hours
           if (dateTime.isAfter(DateTime.now().subtract(Duration(hours: 36)))) {
             if (weather == 'Rain') rainPeriods['last_36_hours'] = true;
-          } else if (dateTime.isBefore(DateTime.now().subtract(Duration(hours: 36))) &&
-              dateTime.isAfter(DateTime.now().subtract(Duration(hours: 72)))) {
+          }
+          // Check if the time is between 36 to 72 hours ago
+          else if (dateTime.isAfter(DateTime.now().subtract(Duration(hours: 72)))) {
             if (weather == 'Rain') rainPeriods['36_to_72_hours'] = true;
-          } else {
+          }
+          // All other times are over 72 hours ago
+          else {
             if (weather == 'Rain') rainPeriods['over_72_hours'] = true;
           }
         }
@@ -90,4 +93,7 @@ class WeatherService{
       return rainPeriods;
     }
   }
+
+
+
 }
