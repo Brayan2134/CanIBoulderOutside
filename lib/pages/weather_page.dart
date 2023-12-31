@@ -1,9 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -19,7 +20,7 @@ class _WeatherPageState extends State<WeatherPage> {
   bool isLoading = true;
   String _currentUnit = 'Metric';
   final _storage = const FlutterSecureStorage();
-
+  bool delayPassed = false;
 
   _initApiKey() async {
     String? apiKey = await _storage.read(key: "openWeatherMapAPIKey");
@@ -34,7 +35,21 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
+  void startLoadingWithDelay() {
+    setState(() {
+      isLoading = true;
+      delayPassed = false;
+    });
 
+    // Start a 3-second timer
+    Timer(Duration(seconds: 0), () {
+      if (isLoading) {
+        setState(() {
+          delayPassed = true;
+        });
+      }
+    });
+  }
 
   _fetchWeather() async {
     String cityName = await _weatherService.getCurrentCity();
@@ -50,6 +65,7 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 
   void loadRainData() async {
+    startLoadingWithDelay();
     String cityName = await _weatherService.getCurrentCity();
 
     setState(() {
@@ -131,7 +147,11 @@ class _WeatherPageState extends State<WeatherPage> {
 
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
-      return const Text("Loading rain data...");
+      return const Text("Loading rain data...",
+        style: const TextStyle(
+          color: Colors.white,
+        )
+      );
     }
     return Column(
       children: [
@@ -201,7 +221,10 @@ class _WeatherPageState extends State<WeatherPage> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(rockType, style: TextStyle(color: Colors.white),),
+          Text(
+            rockType,
+            style: TextStyle(color: Colors.white),
+          ),
           Text(condition, style: TextStyle(color: conditionColor)),
         ],
       ),
@@ -260,33 +283,42 @@ class _WeatherPageState extends State<WeatherPage> {
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService.getUnitType,
+                                future: _weatherService?.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Display a loading indicator or a placeholder
-                                    return CircularProgressIndicator();
+                                  // Define the widget to display based on the loading state
+                                  Widget displayWidget;
+
+                                  if (isLoading && delayPassed) {
+                                    // Display a loading indicator if still loading and delay has passed
+                                    displayWidget = Center(child: CircularProgressIndicator());
+                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator while waiting for Future to resolve
+                                    displayWidget = CircularProgressIndicator();
                                   } else if (snapshot.hasError) {
                                     // Handle the error
-                                    return Text('Error: ${snapshot.error}');
+                                    displayWidget = Text('Error: ${snapshot.error}');
                                   } else {
                                     // Display the temperature with the unit
-                                    return Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color.fromRGBO(80, 82, 94, 1),
-                                        borderRadius: BorderRadius.circular(12),
+                                    displayWidget = Text(
+                                      '${_weather?.temperature.round()}°${snapshot.data}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      child: Text(
-                                        '${_weather?.temperature.round()}°${snapshot.data}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 48,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     );
                                   }
+
+                                  // Return the Container with the dynamic widget
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: displayWidget,
+                                  );
                                 },
                               ),
                             ),
@@ -304,37 +336,43 @@ class _WeatherPageState extends State<WeatherPage> {
                               child: FutureBuilder<String>(
                                 future: _weatherService?.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Display a loading indicator or a placeholder
-                                    return const CircularProgressIndicator();
+                                  Widget temperatureWidget;
+
+                                  if (isLoading && delayPassed) {
+                                    // Display a loading indicator if still loading and delay has passed
+                                    temperatureWidget = Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
-                                    return Text('Error: ${snapshot.error}');
+                                    temperatureWidget = Text('Error: ${snapshot.error}');
+                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator while waiting for Future to resolve
+                                    temperatureWidget = CircularProgressIndicator();
                                   } else {
                                     // Display the temperature with the unit
-                                    return Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color.fromRGBO(80, 82, 94, 1),
-                                        borderRadius: BorderRadius.circular(12),
+                                    temperatureWidget = Text(
+                                      '${_weather?.tempMax.round()}°${snapshot.data} High'
+                                          '\n'
+                                          '${_weather?.tempMin.round()}°${snapshot.data} Low',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 32,
                                       ),
-                                      child: Text(
-                                        '${_weather?.tempMax.round()}°${snapshot.data} High'
-                                            '\n'
-                                            '${_weather?.tempMin.round()}°${snapshot.data} Low',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 32,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     );
                                   }
+
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: temperatureWidget,
+                                  );
                                 },
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            // Spacing between the containers
+                            const SizedBox(width: 16), // Spacing between the containers
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -342,7 +380,9 @@ class _WeatherPageState extends State<WeatherPage> {
                                   color: Color.fromRGBO(80, 82, 94, 1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Text(
+                                child: isLoading && delayPassed
+                                    ? Center(child: CircularProgressIndicator())
+                                    : Text(
                                   '${_weather?.windSpeed.round()} wind'
                                       '\n'
                                       '${_weather?.mainCondition}',
@@ -356,7 +396,6 @@ class _WeatherPageState extends State<WeatherPage> {
                             ),
                           ],
                         ),
-
 
                         const SizedBox(height: 15),
 
@@ -382,14 +421,15 @@ class _WeatherPageState extends State<WeatherPage> {
                           ],
                         ),
 
-                        const SizedBox(height: 15,),
+                        const SizedBox(
+                          height: 15,
+                        ),
 
                         Column(
                           children: <Widget>[
                             _climbingConditionsContainer(),
                           ],
                         ),
-
                       ],
                     ),
                   ),
@@ -439,8 +479,10 @@ class _WeatherPageState extends State<WeatherPage> {
   // Helper method to create a container for all climbing condition tiles
   Widget _climbingConditionsContainer() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8), // Vertical spacing around the container
-      padding: EdgeInsets.all(8), // Padding inside the container
+      margin: EdgeInsets.symmetric(vertical: 8),
+      // Vertical spacing around the container
+      padding: EdgeInsets.all(8),
+      // Padding inside the container
       decoration: BoxDecoration(
         color: Color.fromRGBO(80, 82, 94, 1), // Container color
         borderRadius: BorderRadius.circular(12), // Rounded corners
@@ -448,10 +490,14 @@ class _WeatherPageState extends State<WeatherPage> {
       ),
       child: Column(
         children: [
-          _styledClimbingConditionTile("Sandstone", "Sandstone is a sedimentary rock composed of mainly sand that absorbs moisture easily when it rains.As a result, climbing this rock type while it's still wet or damp has the potential to ruin the holds (and possibly route).Please use best judgment prior to climbing.\n\nSafe: Dry rock, no rain in over 72 hours.\nCaution: Dry rock, no rain in the last 36-72 hours.\nDo not climb: Wet rock (or/and) rain within the last 36 hours."),
-          _styledClimbingConditionTile("Conglomerate", "Conglomerate is a type of sedimentary rock that is comprised of rounded pebbles and sand. As a result, it's best to avoid climbing this rock type while the route is wet or damp. Furthermore, climbing wet routes leads to slippery and possible breaking of holds. \n\nSafe: Dry rock, no rain in the last 36-72 hours. \nCaution: Dry rock, no rain in the last 36 hours. \nDo not climb: Wet rock (and/or) rain in the last 36 hours."),
-          _styledClimbingConditionTile("Igneous", "Igneous rock is one of the three main rock types made in the earths mantle or crust. Some examples of Igneous rock include diorite, gabbro, granite, and pegmatite.They are generally safe to climb on as the rock doesn't absorb moisture well.Be advised that wet Igneous rock is moderately slippery.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
-          _styledClimbingConditionTile("Metamorphic", "Metamorphic rock is formed when existing rocks are banded together to create a new rock. Some examples of Metamorphic rock include gneiss, quartzite, marble, and soapstone. They are generally safe to climb on as the rock doesn't absorb moisture well.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
+          _styledClimbingConditionTile("Sandstone",
+              "Sandstone is a sedimentary rock composed of mainly sand that absorbs moisture easily when it rains.As a result, climbing this rock type while it's still wet or damp has the potential to ruin the holds (and possibly route).Please use best judgment prior to climbing.\n\nSafe: Dry rock, no rain in over 72 hours.\nCaution: Dry rock, no rain in the last 36-72 hours.\nDo not climb: Wet rock (or/and) rain within the last 36 hours."),
+          _styledClimbingConditionTile("Conglomerate",
+              "Conglomerate is a type of sedimentary rock that is comprised of rounded pebbles and sand. As a result, it's best to avoid climbing this rock type while the route is wet or damp. Furthermore, climbing wet routes leads to slippery and possible breaking of holds. \n\nSafe: Dry rock, no rain in the last 36-72 hours. \nCaution: Dry rock, no rain in the last 36 hours. \nDo not climb: Wet rock (and/or) rain in the last 36 hours."),
+          _styledClimbingConditionTile("Igneous",
+              "Igneous rock is one of the three main rock types made in the earths mantle or crust. Some examples of Igneous rock include diorite, gabbro, granite, and pegmatite.They are generally safe to climb on as the rock doesn't absorb moisture well.Be advised that wet Igneous rock is moderately slippery.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
+          _styledClimbingConditionTile("Metamorphic",
+              "Metamorphic rock is formed when existing rocks are banded together to create a new rock. Some examples of Metamorphic rock include gneiss, quartzite, marble, and soapstone. They are generally safe to climb on as the rock doesn't absorb moisture well.\n\nSafe: Dry rock, no rain in the last 36 hours.\nCaution: Wet rock, rain in the last 36 hours."),
         ],
       ),
     );
@@ -459,7 +505,7 @@ class _WeatherPageState extends State<WeatherPage> {
 
 // Helper method to create a row for each climbing condition tile
   Widget _styledClimbingConditionTile(String rockType, String rockInfo) {
-    return buildClimbingConditionTile(rockType, rockInfo); // Directly return the tile
+    return buildClimbingConditionTile(
+        rockType, rockInfo); // Directly return the tile
   }
-
 }

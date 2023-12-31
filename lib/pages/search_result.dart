@@ -4,6 +4,8 @@ import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
+
 
 class SearchResult extends StatefulWidget {
   final String cityName;
@@ -20,6 +22,7 @@ class _SearchResultPageState extends State<SearchResult> {
   Map<String, bool>? rainData;
   bool isLoading = true;
   final _storage = const FlutterSecureStorage();
+  bool delayPassed = false;
 
 
   _initApiKey() async {
@@ -31,6 +34,23 @@ class _SearchResultPageState extends State<SearchResult> {
     } else {
       // Handle the case where API key is not found
     }
+  }
+
+
+  void startLoadingWithDelay() {
+    setState(() {
+      isLoading = true;
+      delayPassed = false;
+    });
+
+    // Start a 3-second timer
+    Timer(Duration(seconds: 0), () {
+      if (isLoading) {
+        setState(() {
+          delayPassed = true;
+        });
+      }
+    });
   }
 
 
@@ -46,6 +66,7 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
   void loadRainData() async {
+    startLoadingWithDelay();
     setState(() {
       isLoading = true; // Set to true when starting to load data
     });
@@ -112,7 +133,11 @@ class _SearchResultPageState extends State<SearchResult> {
 
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
-      return const Text("Loading rain data...");
+      return const Text("Loading rain data...",
+          style: const TextStyle(
+            color: Colors.white,
+          )
+      );
     }
     return Column(
       children: [
@@ -245,33 +270,42 @@ class _SearchResultPageState extends State<SearchResult> {
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService.getUnitType,
+                                future: _weatherService?.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Display a loading indicator or a placeholder
-                                    return CircularProgressIndicator();
+                                  // Define the widget to display based on the loading state
+                                  Widget displayWidget;
+
+                                  if (isLoading && delayPassed) {
+                                    // Display a loading indicator if still loading and delay has passed
+                                    displayWidget = Center(child: CircularProgressIndicator());
+                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator while waiting for Future to resolve
+                                    displayWidget = CircularProgressIndicator();
                                   } else if (snapshot.hasError) {
                                     // Handle the error
-                                    return Text('Error: ${snapshot.error}');
+                                    displayWidget = Text('Error: ${snapshot.error}');
                                   } else {
                                     // Display the temperature with the unit
-                                    return Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color.fromRGBO(80, 82, 94, 1),
-                                        borderRadius: BorderRadius.circular(12),
+                                    displayWidget = Text(
+                                      '${_weather?.temperature.round()}°${snapshot.data}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 48,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      child: Text(
-                                        '${_weather?.temperature.round()}°${snapshot.data}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 48,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     );
                                   }
+
+                                  // Return the Container with the dynamic widget
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: displayWidget,
+                                  );
                                 },
                               ),
                             ),
@@ -288,37 +322,43 @@ class _SearchResultPageState extends State<SearchResult> {
                               child: FutureBuilder<String>(
                                 future: _weatherService?.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Display a loading indicator or a placeholder
-                                    return const CircularProgressIndicator();
+                                  Widget temperatureWidget;
+
+                                  if (isLoading && delayPassed) {
+                                    // Display a loading indicator if still loading and delay has passed
+                                    temperatureWidget = Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
-                                    return Text('Error: ${snapshot.error}');
+                                    temperatureWidget = Text('Error: ${snapshot.error}');
+                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator while waiting for Future to resolve
+                                    temperatureWidget = CircularProgressIndicator();
                                   } else {
                                     // Display the temperature with the unit
-                                    return Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color.fromRGBO(80, 82, 94, 1),
-                                        borderRadius: BorderRadius.circular(12),
+                                    temperatureWidget = Text(
+                                      '${_weather?.tempMax.round()}°${snapshot.data} High'
+                                          '\n'
+                                          '${_weather?.tempMin.round()}°${snapshot.data} Low',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 32,
                                       ),
-                                      child: Text(
-                                        '${_weather?.tempMax.round()}°${snapshot.data} High'
-                                            '\n'
-                                            '${_weather?.tempMin.round()}°${snapshot.data} Low',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 32,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     );
                                   }
+
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: temperatureWidget,
+                                  );
                                 },
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            // Spacing between the containers
+                            const SizedBox(width: 16), // Spacing between the containers
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -326,7 +366,9 @@ class _SearchResultPageState extends State<SearchResult> {
                                   color: Color.fromRGBO(80, 82, 94, 1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Text(
+                                child: isLoading && delayPassed
+                                    ? Center(child: CircularProgressIndicator())
+                                    : Text(
                                   '${_weather?.windSpeed.round()} wind'
                                       '\n'
                                       '${_weather?.mainCondition}',
