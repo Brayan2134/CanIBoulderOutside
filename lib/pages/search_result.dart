@@ -244,21 +244,35 @@ class _SearchResultPageState extends State<SearchResult> {
                         Row(
                           children: <Widget>[
                             Expanded(
-                              child: Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(80, 82, 94, 1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${_weather?.temperature.round()}°',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                              child: FutureBuilder<String>(
+                                future: _weatherService.getUnitType,
+                                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator or a placeholder
+                                    return CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    // Handle the error
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    // Display the temperature with the unit
+                                    return Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color.fromRGBO(80, 82, 94, 1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${_weather?.temperature.round()}°${snapshot.data}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
                             ),
                           ],
@@ -271,29 +285,43 @@ class _SearchResultPageState extends State<SearchResult> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             Expanded(
-                              child: Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(80, 82, 94, 1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${_weather?.tempMax.round()}° High'
-                                      '\n'
-                                      '${_weather?.tempMin.round()}° Low',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                              child: FutureBuilder<String>(
+                                future: _weatherService?.getUnitType,
+                                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator or a placeholder
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    // Handle the error
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    // Display the temperature with the unit
+                                    return Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color.fromRGBO(80, 82, 94, 1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '${_weather?.tempMax.round()}°${snapshot.data} High'
+                                            '\n'
+                                            '${_weather?.tempMin.round()}°${snapshot.data} Low',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 32,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
                             ),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             // Spacing between the containers
                             Expanded(
                               child: Container(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Color.fromRGBO(80, 82, 94, 1),
                                   borderRadius: BorderRadius.circular(12),

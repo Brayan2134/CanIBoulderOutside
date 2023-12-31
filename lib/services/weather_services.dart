@@ -103,6 +103,20 @@ class WeatherService{
     }
   }
 
+  Future<String> get getUnitType async {
+    String unitType = await SettingsService().getCurrentUnitType();
+    unitType = unitType.toLowerCase();
+
+    if (unitType == 'imperial') {
+      return 'F';
+    } else if (unitType == 'metric') {
+      return 'C';
+    } else {
+      // Handle unexpected unitType value
+      throw Exception('Invalid unit type');
+    }
+  }
+
 
 
 }
