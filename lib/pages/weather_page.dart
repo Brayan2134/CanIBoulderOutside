@@ -375,13 +375,13 @@ class _WeatherPageState extends State<WeatherPage> {
           // Handle navigation based on the selected index
           switch (index) {
             case 0:
-              Navigator.pushReplacementNamed(context, '/home');
+              // No need to navigate, already on the WeatherPage
               break;
             case 1:
-              Navigator.pushReplacementNamed(context, '/search');
+              Navigator.pushNamed(context, '/search');
               break;
             case 2:
-              Navigator.pushReplacementNamed(context, '/settings');
+              Navigator.pushNamed(context, '/settings');
               break;
           }
         },
