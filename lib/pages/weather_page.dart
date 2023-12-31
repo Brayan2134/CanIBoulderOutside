@@ -22,7 +22,7 @@ class _WeatherPageState extends State<WeatherPage> {
 
 
   _initApiKey() async {
-    String? apiKey = await _storage.read(key: "apiKey");
+    String? apiKey = await _storage.read(key: "openWeatherMapAPIKey");
     if (apiKey != null) {
       _weatherService.setApiKey(apiKey);
       _loadSettings();

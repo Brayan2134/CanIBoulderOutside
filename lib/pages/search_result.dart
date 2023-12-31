@@ -23,10 +23,11 @@ class _SearchResultPageState extends State<SearchResult> {
 
 
   _initApiKey() async {
-    String? apiKey = await _storage.read(key: 'apiKey');
+    String? apiKey = await _storage.read(key: 'openWeatherMapAPIKey');
     if (apiKey != null) {
       _weatherService.setApiKey(apiKey);
       _fetchWeather();
+      loadRainData();
     } else {
       // Handle the case where API key is not found
     }
@@ -107,8 +108,6 @@ class _SearchResultPageState extends State<SearchResult> {
   void initState() {
     super.initState();
     _initApiKey();
-    _fetchWeather();
-    loadRainData();
   }
 
   Widget _buildRainDataDisplay() {

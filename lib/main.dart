@@ -9,7 +9,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final storage = FlutterSecureStorage();
-  await storage.write(key: 'apiKey', value: 'eeb0f7ab19f20666b209b9027da3fe9b');
+  await storage.write(key: 'openWeatherMapAPIKey', value: 'eeb0f7ab19f20666b209b9027da3fe9b');
+  await storage.write(key: 'googleMapsAPIKEY', value: 'AIzaSyAvM88VaGwlbJOnJesCbJo3FMyfS_4fFww');
 
   runApp(MyApp());
 }

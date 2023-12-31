@@ -1,13 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/search_model.dart'; // Assuming you have a Search model
+import '../models/search_model.dart';
 
 class SearchService {
-  final String apiKey;
+  String? apiKey;
 
-  SearchService(this.apiKey);
+  SearchService();
+
+  setApiKey(String key) {
+    apiKey = key;
+  }
 
   Future<Search?> search(String locationQuery) async {
+
+    if (apiKey == null) {
+      throw Exception('search_service search: GOOGLE MAPS API KEY IS NOT INITIALIZED');
+    }
+
     final apiKeyParam = 'key=$apiKey';
     final endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?$apiKeyParam&address=$locationQuery';
 
@@ -28,6 +37,11 @@ class SearchService {
   }
 
   Future<String?> getCurrentCity(String locationQuery) async {
+
+    if (apiKey == null) {
+      throw Exception('search_service getCurrentCity: GOOGLE MAPS API KEY IS NOT INITIALIZED');
+    }
+
     final apiKeyParam = 'key=$apiKey';
     final endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?$apiKeyParam&address=$locationQuery';
 
@@ -59,6 +73,11 @@ class SearchService {
 
 
   Future<List<String>> fetchSuggestions(String input) async {
+
+    if (apiKey == null) {
+      throw Exception('search_service fetchSuggestions: GOOGLE MAPS API KEY IS NOT INITIALIZED');
+    }
+
     final request = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&types=(cities)&key=$apiKey';
     final response = await http.get(Uri.parse(request));
 

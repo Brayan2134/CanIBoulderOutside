@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/search_model.dart'; // Assuming you have a Search model
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
 import './search_result.dart';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
 
@@ -11,14 +14,25 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   Search? _search;
-  final _searchService = SearchService('AIzaSyAvM88VaGwlbJOnJesCbJo3FMyfS_4fFww'); // Replace with your actual API key
+  final _searchService = SearchService(); // Replace with your actual API key
   TextEditingController _searchController = TextEditingController();
   Future<List<String>> _suggestions = Future.value([]);
+  final _storage = FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
+    _initApiKey();
     _searchController.addListener(_onSearchChanged);
+  }
+
+  _initApiKey() async {
+    String? apiKey = await _storage.read(key: 'googleMapsAPIKEY');
+    if (apiKey != null) {
+      _searchService.setApiKey(apiKey);
+    } else {
+      // Handle the case where API key is not found
+    }
   }
 
   void _onSearchChanged() {

@@ -94,11 +94,11 @@ class WeatherService{
         }
         return rainPeriods;
       } else {
-        print('Request failed with status: ${response.statusCode}.');
+        print('weather_services checkRainPeriods: Request failed with status: ${response.statusCode}.');
         return rainPeriods;
       }
     } catch (e) {
-      print('An error occurred: $e');
+      print('weather_services checkRainPeriods: An error has occured with the try/catch statement?');
       return rainPeriods;
     }
   }
