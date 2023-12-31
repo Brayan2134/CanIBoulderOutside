@@ -10,11 +10,20 @@ import 'package:http/http.dart' as http;
 class WeatherService{
 
   static const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
-  final String apiKey;
+  String? apiKey;
+  WeatherService();
 
-  WeatherService(this.apiKey);
+  setApiKey(String key) {
+    apiKey = key;
+  }
 
   Future<Weather> getWeather(String cityName) async{
+
+    // Ensure apiKey is not null
+    if (apiKey == null) {
+      throw Exception('API key is not initialized.');
+    }
+
     String unitType = await SettingsService().getCurrentUnitType();
     final response = await http.get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=$unitType'));
 

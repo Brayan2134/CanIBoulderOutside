@@ -3,6 +3,7 @@ import '../models/search_model.dart'; // Assuming you have a Search model
 import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
 import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SearchResult extends StatefulWidget {
   final String cityName;
@@ -14,10 +15,23 @@ class SearchResult extends StatefulWidget {
 }
 
 class _SearchResultPageState extends State<SearchResult> {
-  final _weatherService = WeatherService("eeb0f7ab19f20666b209b9027da3fe9b");
+  final _weatherService = WeatherService();
   Weather? _weather;
   Map<String, bool>? rainData;
   bool isLoading = true;
+  final _storage = const FlutterSecureStorage();
+
+
+  _initApiKey() async {
+    String? apiKey = await _storage.read(key: 'apiKey');
+    if (apiKey != null) {
+      _weatherService.setApiKey(apiKey);
+      _fetchWeather();
+    } else {
+      // Handle the case where API key is not found
+    }
+  }
+
 
   _fetchWeather() async {
     try {
@@ -92,6 +106,7 @@ class _SearchResultPageState extends State<SearchResult> {
   @override
   void initState() {
     super.initState();
+    _initApiKey();
     _fetchWeather();
     loadRainData();
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -11,11 +13,28 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
-  final _weatherService = WeatherService("eeb0f7ab19f20666b209b9027da3fe9b");
+  final _weatherService = WeatherService();
   Weather? _weather;
   Map<String, bool>? rainData;
   bool isLoading = true;
-  String _currentUnit = 'Metric'; // default value
+  String _currentUnit = 'Metric';
+  final _storage = const FlutterSecureStorage();
+
+
+  _initApiKey() async {
+    String? apiKey = await _storage.read(key: "apiKey");
+    if (apiKey != null) {
+      _weatherService.setApiKey(apiKey);
+      _loadSettings();
+      _fetchWeather();
+      loadRainData();
+    } else {
+      // Handle the case where API key is not found
+      throw Exception("API KEY NOT FOUND!");
+    }
+  }
+
+
 
   _fetchWeather() async {
     String cityName = await _weatherService.getCurrentCity();
@@ -107,9 +126,7 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   void initState() {
     super.initState();
-    _loadSettings();
-    _fetchWeather();
-    loadRainData(); // Add this line
+    _initApiKey();
   }
 
   Widget _buildRainDataDisplay() {

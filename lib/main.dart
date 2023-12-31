@@ -3,9 +3,15 @@ import 'pages/weather_page.dart';
 import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-void main() {
-  runApp(const MyApp());
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final storage = FlutterSecureStorage();
+  await storage.write(key: 'apiKey', value: 'eeb0f7ab19f20666b209b9027da3fe9b');
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
