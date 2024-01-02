@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:intl/intl.dart';
+>>>>>>> Stashed changes
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -15,8 +21,81 @@ class _WeatherPageState extends State<WeatherPage> {
   Weather? _weather;
   Map<String, bool>? rainData;
   bool isLoading = true;
+<<<<<<< Updated upstream
   String _currentUnit = 'Metric'; // default value
   DateTime? lastFetchTime;
+=======
+  String _currentUnit = 'Metric';
+  final _storage = const FlutterSecureStorage();
+  bool delayPassed = false;
+  DateTime? _lastFetchTime;
+
+  _initApiKey() async {
+    String? apiKey = await _storage.read(key: "openWeatherMapAPIKey");
+    if (apiKey != null) {
+      _weatherService.setApiKey(apiKey);
+      _loadSettings();
+      _fetchWeather();
+      loadRainData();
+    } else {
+      // Handle the case where API key is not found
+      throw Exception("API KEY NOT FOUND!");
+    }
+  }
+
+  void startLoadingWithDelay() {
+    setState(() {
+      isLoading = true;
+      delayPassed = false;
+    });
+
+    // Start a 3-second timer
+    Timer(Duration(seconds: 0), () {
+      if (isLoading) {
+        setState(() {
+          delayPassed = true;
+        });
+      }
+    });
+  }
+>>>>>>> Stashed changes
+
+
+  Future<void> _checkFetchWeatherConditions() async {
+    bool isConnected = await _checkInternetConnection();
+    if (!isConnected) return; // Exit if no internet connection
+
+    // Check if the app is launching for the first time or it's been over an hour
+    final prefs = await SharedPreferences.getInstance();
+    String? lastFetchString = prefs.getString('lastFetchTime');
+    DateTime now = DateTime.now();
+
+    if (lastFetchString == null || _isOverAnHour(now, DateTime.parse(lastFetchString))) {
+      _fetchWeather(); // Fetch weather data
+      prefs.setString('lastFetchTime', now.toIso8601String()); // Update fetch time
+    }
+  }
+
+  Future<bool> _checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult != ConnectivityResult.none;
+  }
+
+  bool _isOverAnHour(DateTime now, DateTime lastFetch) {
+    return now.difference(lastFetch).inHours >= 1;
+  }
+
+
+  Future<void> _checkIfUnitsChanged() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool unitChanged = prefs.getBool('unitChanged') ?? false;
+
+    if (unitChanged) {
+      await _fetchWeather();
+      prefs.setBool('unitChanged', false); // Reset the flag
+    }
+  }
+
 
   _fetchWeather() async {
     String cityName = await _weatherService.getCurrentCity();
@@ -92,6 +171,7 @@ class _WeatherPageState extends State<WeatherPage> {
     }
   }
 
+<<<<<<< Updated upstream
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -124,13 +204,35 @@ class _WeatherPageState extends State<WeatherPage> {
     if (lastFetchTime == null || DateTime.now().difference(lastFetchTime!) > Duration(hours: 1)) {
       loadRainData();
       lastFetchTime = DateTime.now();
+=======
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadSettings();
+    _checkIfUnitsChanged();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    String savedUnit = prefs.getString('unitType') ?? 'Metric';
+    if (_currentUnit != savedUnit) {
+      setState(() {
+        _currentUnit = savedUnit;
+      });
+      // Optionally re-fetch weather data here if unit change should trigger a fetch
+>>>>>>> Stashed changes
     }
   }
 
   @override
   void initState() {
     super.initState();
+<<<<<<< Updated upstream
     _loadSettings();
+=======
+    _initApiKey();
+    _checkIfUnitsChanged();
+>>>>>>> Stashed changes
   }
 
   Widget _buildRainDataDisplay() {
@@ -393,13 +495,21 @@ class _WeatherPageState extends State<WeatherPage> {
         unselectedItemColor: Colors.grey,
         currentIndex: 0,
         onTap: (index) {
-          // Handle navigation based on the selected index
           switch (index) {
+<<<<<<< Updated upstream
+=======
+            case 0:
+            // Navigate to the WeatherPage and remove all routes above it
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+              break;
+>>>>>>> Stashed changes
             case 1:
-              Navigator.pushNamed(context, '/search');
+            // Navigate to the SearchPage and remove all routes above it
+              Navigator.of(context).pushNamedAndRemoveUntil('/search', ModalRoute.withName('/'));
               break;
             case 2:
-              Navigator.pushNamed(context, '/settings');
+            // Navigate to the SettingsPage and remove all routes above it
+              Navigator.of(context).pushNamedAndRemoveUntil('/settings', ModalRoute.withName('/'));
               break;
           }
         },
