@@ -3,31 +3,58 @@ import 'pages/weather_page.dart';
 import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final storage = FlutterSecureStorage();
-  await storage.write(key: 'openWeatherMapAPIKey', value: 'eeb0f7ab19f20666b209b9027da3fe9b');
-  await storage.write(key: 'googleMapsAPIKEY', value: 'AIzaSyAvM88VaGwlbJOnJesCbJo3FMyfS_4fFww');
-
+void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int _selectedIndex = 0;
+  final List<Widget> _pages = [
+    WeatherPage(),
+    SearchPage(),
+    SettingsPage(),
+  ];
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WeatherPage(),
-      routes:{
-        '/home': (context) => const WeatherPage(),
-        '/search': (context) => const SearchPage(),
-        '/settings': (context) => const SettingsPage(), // Replace with your settings screen widget
-      }
+      home: Scaffold(
+        body: Center(
+          child: _pages.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.cloud),
+              label: 'Weather',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.grey,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+        ),
+      ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 }
