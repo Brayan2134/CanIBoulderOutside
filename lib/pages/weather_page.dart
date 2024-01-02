@@ -7,10 +7,17 @@ import 'package:boulderconds/services/weather_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class WeatherPage extends StatefulWidget {
-  const WeatherPage({super.key});
+  // Singleton instance
+  static final WeatherPage _instance = WeatherPage._internal();
+
+  factory WeatherPage() {
+    return _instance;
+  }
+
+  WeatherPage._internal({Key? key}) : super(key: key);
 
   @override
-  State<WeatherPage> createState() => _WeatherPageState();
+  _WeatherPageState createState() => _WeatherPageState();
 }
 
 class _WeatherPageState extends State<WeatherPage> {

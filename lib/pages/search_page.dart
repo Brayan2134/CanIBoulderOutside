@@ -6,7 +6,14 @@ import './search_result.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  // Singleton instance
+  static final SearchPage _instance = SearchPage._internal();
+
+  factory SearchPage() {
+    return _instance;
+  }
+
+  SearchPage._internal({Key? key}) : super(key: key);
 
   @override
   _SearchPageState createState() => _SearchPageState();

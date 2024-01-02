@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import '../services/settings_service.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  // Singleton instance
+  static final SettingsPage _instance = SettingsPage._internal();
+
+  factory SettingsPage() {
+    return _instance;
+  }
+
+  SettingsPage._internal({Key? key}) : super(key: key);
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  _SettingsPageState createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
