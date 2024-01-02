@@ -374,26 +374,47 @@ class _WeatherPageState extends State<WeatherPage> {
                             ),
                             const SizedBox(width: 16), // Spacing between the containers
                             Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Color.fromRGBO(80, 82, 94, 1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: isLoading && delayPassed
-                                    ? Center(child: CircularProgressIndicator())
-                                    : Text(
-                                  '${_weather?.windSpeed.round()} wind'
-                                      '\n'
-                                      '${_weather?.mainCondition}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                              child: FutureBuilder<String>(
+                                future: _weatherService?.getUnitType,
+                                builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                                  Widget windSpeedWidget;
+
+                                  if (isLoading && delayPassed) {
+                                    // Display a loading indicator if still loading and delay has passed
+                                    windSpeedWidget = Center(child: CircularProgressIndicator());
+                                  } else if (snapshot.hasError) {
+                                    // Handle the error
+                                    windSpeedWidget = Text('Error: ${snapshot.error}');
+                                  } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                    // Display a loading indicator while waiting for Future to resolve
+                                    windSpeedWidget = CircularProgressIndicator();
+                                  } else {
+                                    // Determine the unit for wind speed
+                                    String windUnit = (snapshot.data == 'F') ? 'MPH' : 'Kmh';
+
+                                    // Display the wind speed with the unit
+                                    windSpeedWidget = Text(
+                                      '${_weather?.windSpeed.round()} $windUnit wind',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 32,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    );
+                                  }
+
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: windSpeedWidget,
+                                  );
+                                },
                               ),
                             ),
+
                           ],
                         ),
 
