@@ -3,6 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< Updated upstream
+=======
+  connectivity_plus
+  flutter_secure_storage_windows
+>>>>>>> Stashed changes
   geolocator_windows
 )
 

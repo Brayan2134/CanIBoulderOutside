@@ -165,16 +165,21 @@ class _SearchPageState extends State<SearchPage> {
         unselectedItemColor: Colors.grey,
         currentIndex: 1, // Set the initial index to 1 for 'Search'
         onTap: (index) {
-          // Handle navigation based on the selected index
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home');
+            // Pop back to the first route (WeatherPage) without creating a new instance
+              Navigator.of(context).popUntil((route) => route.isFirst);
               break;
             case 1:
+<<<<<<< Updated upstream
             // No need to navigate, already on the Search page
+=======
+            // No need to navigate if already on the SearchPage
+>>>>>>> Stashed changes
               break;
             case 2:
-              Navigator.pushNamed(context, '/settings');
+            // Navigate to the SettingsPage and remove all routes above it
+              Navigator.of(context).pushNamedAndRemoveUntil('/settings', ModalRoute.withName('/'));
               break;
           }
         },

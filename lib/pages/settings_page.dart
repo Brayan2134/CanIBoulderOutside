@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/settings_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -13,19 +14,29 @@ class _SettingsPageState extends State<SettingsPage> {
   final List<String> units = ['Imperial', 'Metric'];
   final SettingsService settingsService = SettingsService();
 
-  void _onUnitChanged(String newUnit) {
-    setState(() {
-      currentUnit = newUnit;
-    });
-    // Update the unit type in SettingsService
-    settingsService.updateUnitTypeFromSettings(currentUnit.toLowerCase());
+  void _onUnitChanged(String newUnit) async {
+    if (newUnit != currentUnit) {
+      setState(() {
+        currentUnit = newUnit;
+      });
+
+      // Update the unit type in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('unitType', currentUnit.toLowerCase());
+      await prefs.setBool('unitChanged', true);
+    }
   }
 
   void _loadUnitType() async {
-    String savedUnit = await settingsService.getCurrentUnitType();
-    setState(() {
-      currentUnit = savedUnit == 'metric' ? 'Metric' : 'Imperial';
-    });
+    final prefs = await SharedPreferences.getInstance();
+    String savedUnit = prefs.getString('unitType') ?? 'metric';  // Default to lowercase 'metric'
+    savedUnit = savedUnit.toLowerCase();  // Ensure it's in lowercase
+
+    if (savedUnit != currentUnit.toLowerCase()) {
+      setState(() {
+        currentUnit = savedUnit;
+      });
+    }
   }
 
   @override
@@ -152,20 +163,25 @@ class _SettingsPageState extends State<SettingsPage> {
         unselectedItemColor: Colors.grey,
         currentIndex: 2,
         onTap: (index) {
-          // Handle navigation based on the selected index
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/home');
+            // Pop back to the first route (WeatherPage) without creating a new instance
+              Navigator.of(context).popUntil((route) => route.isFirst);
               break;
             case 1:
-              Navigator.pushNamed(context, '/search');
+            // Navigate to the SearchPage and remove all routes above it
+              Navigator.of(context).pushNamedAndRemoveUntil('/search', ModalRoute.withName('/'));
               break;
             case 2:
+<<<<<<< Updated upstream
               Navigator.pushNamed(context, '/settings');
+=======
+            // No need to navigate if already on the SettingsPage
+>>>>>>> Stashed changes
               break;
           }
         },
-      ), // Your existing bottom navigation bar code
+      ),
     );
   }
 

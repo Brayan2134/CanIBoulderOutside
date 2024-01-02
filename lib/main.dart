@@ -15,12 +15,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context){
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const WeatherPage(),
-      routes:{
-        '/home': (context) => const WeatherPage(),
+      routes: {
+        '/': (context) => const WeatherPage(),
         '/search': (context) => const SearchPage(),
-        '/settings': (context) => const SettingsPage(), // Replace with your settings screen widget
-      }
+        '/settings': (context) => const SettingsPage(),
+      },
     );
+
   }
 }
