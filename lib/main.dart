@@ -14,19 +14,39 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [
-    WeatherPage(),
-    SearchPage(),
-    SettingsPage(),
-  ];
+  final PageStorageBucket bucket = PageStorageBucket();
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      _buildPage(WeatherPage(), 'weatherPage'),
+      _buildPage(SearchPage(), 'searchPage'),
+      _buildPage(SettingsPage(), 'settingsPage'),
+    ];
+  }
+
+  Widget _buildPage(Widget child, String key) {
+    return PageStorage(
+      key: PageStorageKey<String>(key),
+      bucket: bucket,
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Center(
-          child: _pages.elementAt(_selectedIndex),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            WeatherPage(),
+            SearchPage(),
+            SettingsPage(),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const [

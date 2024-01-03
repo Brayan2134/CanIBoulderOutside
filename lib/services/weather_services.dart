@@ -12,6 +12,12 @@ class WeatherService{
   static const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
   String? apiKey;
   WeatherService();
+  DateTime? _lastFetchTime;
+  String? _lastUnitType;
+
+  // Public getters
+  DateTime? get lastFetchTime => _lastFetchTime;
+  String? get lastUnitType => _lastUnitType;
 
   setApiKey(String key) {
     apiKey = key;
@@ -24,7 +30,11 @@ class WeatherService{
       throw Exception('API key is not initialized.');
     }
 
-    String unitType = await SettingsService().getCurrentUnitType();
+    String unitType = await SettingsService().getCurrentUnitType(); // Retrieve unit type
+
+    _lastFetchTime = DateTime.now();
+    _lastUnitType = unitType;
+
     final response = await http.get(Uri.parse('$BASE_URL?q=$cityName&appid=$apiKey&units=$unitType'));
 
     if (response.statusCode == 200){

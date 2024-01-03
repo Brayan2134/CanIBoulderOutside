@@ -13,7 +13,10 @@ class WeatherPage extends StatefulWidget {
   State<WeatherPage> createState() => _WeatherPageState();
 }
 
-class _WeatherPageState extends State<WeatherPage> {
+class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClientMixin<WeatherPage> {
+  @override
+  bool get wantKeepAlive => true;
+
   final _weatherService = WeatherService();
   Weather? _weather;
   Map<String, bool>? rainData;
@@ -52,15 +55,22 @@ class _WeatherPageState extends State<WeatherPage> {
   }
 
   _fetchWeather() async {
-    String cityName = await _weatherService.getCurrentCity();
 
-    try {
-      final weather = await _weatherService.getWeather(cityName);
-      setState(() {
-        _weather = weather;
-      });
-    } catch (e) {
-      print(e);
+    DateTime now = DateTime.now();
+    if (_weatherService.lastFetchTime == null ||
+        _weatherService.lastUnitType != await _weatherService.getUnitType ||
+        now.difference(_weatherService.lastFetchTime!).inHours > 1) {
+
+      String cityName = await _weatherService.getCurrentCity();
+
+      try {
+        final weather = await _weatherService.getWeather(cityName);
+        setState(() {
+          _weather = weather;
+        });
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -244,6 +254,7 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       body: Stack(
         children: <Widget>[

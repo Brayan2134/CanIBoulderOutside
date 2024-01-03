@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import '../services/settings_service.dart';
+import '../services/weather_services.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  _SettingsPageState createState() => _SettingsPageState();
 }
+
 
 class _SettingsPageState extends State<SettingsPage> {
   String currentUnit = 'Metric'; // Default value
   final List<String> units = ['Imperial', 'Metric'];
   final SettingsService settingsService = SettingsService();
+  final WeatherService _weatherService = WeatherService(); // Local instance
 
   void _onUnitChanged(String newUnit) {
+    // Implement the logic that should happen when the unit changes
+    // For example, update the WeatherService settings or notify other parts of the app
+
     setState(() {
       currentUnit = newUnit;
     });
