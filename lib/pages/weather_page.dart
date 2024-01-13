@@ -83,7 +83,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     });
 
     try {
-      var data = await _weatherService.checkRainPeriods(cityName);
+      var data = await _weatherService.checkRainPeriods();
       setState(() {
         rainData = data;
         isLoading = false; // Set to false once data is loaded

@@ -72,7 +72,7 @@ class _SearchResultPageState extends State<SearchResult> {
     });
 
     try {
-      var data = await _weatherService.checkRainPeriods(widget.cityName);
+      var data = await _weatherService.checkRainPeriods();
       setState(() {
         rainData = data;
         isLoading = false; // Set to false once data is loaded
