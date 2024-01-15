@@ -6,7 +6,7 @@ import 'pages/settings_page.dart';
 
 
 /// The entry point of the application.
-void main() {
+void main(){
   runApp(MyApp());
 }
 
