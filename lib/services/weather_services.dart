@@ -149,6 +149,61 @@ class WeatherService{
     }
   }
 
+  /*
+  * HISTORICAL API REPLACEMENT
+  * --------------------------
+  *
+  * USE IF OPENWEATHERMAP GRANTS API ACCESS BECAUSE OF STUDENT STATUS:
+  * 
+    Future<Map<String, bool>> checkRainPeriods() async {
+    Map<String, bool> rainPeriods = {
+      'last_36_hours': false,
+      '36_to_72_hours': false,
+      'over_72_hours': false
+    };
+
+    // Get current position using Geolocator
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000; // Current time in UNIX timestamp
+    int thirtySixHoursAgo = currentTime - 129600; // 36 hours ago in UNIX timestamp
+    int seventyTwoHoursAgo = currentTime - 259200; // 72 hours ago in UNIX timestamp
+
+    // API URL for historical data with latitude and longitude
+    String url = 'https://history.openweathermap.org/data/2.5/history/city?lat=${position.latitude}&lon=${position.longitude}&type=hour&start=$seventyTwoHoursAgo&end=$currentTime&appid=$apiKey';
+
+    try {
+      var response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        // Iterate over the historical data to check for rain
+        for (var entry in data['list']) {
+          var timestamp = entry['dt'];
+          var weather = entry['weather'][0]['main'];
+
+          if (timestamp >= thirtySixHoursAgo && weather == 'Rain') {
+            rainPeriods['last_36_hours'] = true;
+          } else if (timestamp >= seventyTwoHoursAgo && timestamp < thirtySixHoursAgo && weather == 'Rain') {
+            rainPeriods['36_to_72_hours'] = true;
+          } else if (timestamp < seventyTwoHoursAgo && weather == 'Rain') {
+            rainPeriods['over_72_hours'] = true;
+          }
+        }
+
+        return rainPeriods;
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+        return rainPeriods;
+      }
+    } catch (e) {
+      print('An error has occurred: $e');
+      return rainPeriods;
+    }
+  }
+  * -----------------------------------------------------------------------------------------------------------
+  * */
+
 
   /// Gets the current unit type for temperature display.
   ///
