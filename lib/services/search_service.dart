@@ -1,32 +1,16 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-
 import '../models/search_model.dart';
 
-
-/// A service class for handling search and geocoding operations.
 class SearchService {
-  String? apiKey; // Grabs the apiKey stored in shared preferences and stores it as a string.
+  String? apiKey;
 
   SearchService();
 
-  /// Sets the API key for the search service.
-  ///
-  /// [key] The API key as a [String].
   setApiKey(String key) {
     apiKey = key;
   }
 
-
-  /// Searches for a location based on a given query.
-  ///
-  /// This method performs a search using the provided [locationQuery] and
-  /// returns the first result as a [Search] object.
-  ///
-  /// [locationQuery] The query string for the location search.
-  /// Returns a [Future] that resolves to a [Search] object or null if the search fails.
-  /// Throws an [Exception] if the API key is not initialized.
   Future<Search?> search(String locationQuery) async {
 
     if (apiKey == null) {
@@ -52,15 +36,6 @@ class SearchService {
     }
   }
 
-
-  /// Retrieves the city name based on a given location query.
-  ///
-  /// This method performs a geocoding operation using the [locationQuery] and
-  /// returns the city name if found.
-  ///
-  /// [locationQuery] The query string for the geocoding operation.
-  /// Returns a [Future] that resolves to a [String] representing the city name or null if not found.
-  /// Throws an [Exception] if the API key is not initialized.
   Future<String?> getCurrentCity(String locationQuery) async {
 
     if (apiKey == null) {
@@ -92,17 +67,11 @@ class SearchService {
     } catch (e) {
       print('Error: $e');
     }
+
     return null; // Return null if city is not found or in case of any error
   }
 
 
-  /// Fetches autocomplete suggestions for a given input.
-  ///
-  /// This method fetches autocomplete suggestions for the provided [input] string.
-  ///
-  /// [input] The input string for which to fetch suggestions.
-  /// Returns a [Future] that resolves to a [List<String>] of suggestions.
-  /// Throws an [Exception] if the API key is not initialized.
   Future<List<String>> fetchSuggestions(String input) async {
 
     if (apiKey == null) {
