@@ -2,16 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/weather_model.dart';
 import 'package:boulderconds/services/weather_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../models/weather_model.dart';
+
+
+/// A stateful widget that displays weather and climbing condition information.
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
 
   @override
   State<WeatherPage> createState() => _WeatherPageState();
 }
+
+
 
 class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClientMixin<WeatherPage> {
   @override
@@ -25,6 +30,16 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
   final _storage = const FlutterSecureStorage();
   bool delayPassed = false;
 
+
+  /// Entry point for weatherPage.
+  @override
+  void initState() {
+    super.initState();
+    _initApiKey();
+  }
+
+
+  /// Initializes the API key for the weather service from secure storage.
   _initApiKey() async {
     String? apiKey = await _storage.read(key: "openWeatherMapAPIKey");
     if (apiKey != null) {
@@ -38,13 +53,15 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     }
   }
 
+
+  /// Starts a loading process with a delay for better user experience.
   void startLoadingWithDelay() {
     setState(() {
       isLoading = true;
       delayPassed = false;
     });
 
-    // Start a 3-second timer
+    // Start a timer to manage loading state
     Timer(Duration(seconds: 0), () {
       if (isLoading) {
         setState(() {
@@ -54,6 +71,8 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     });
   }
 
+
+  /// Fetches the weather information for the current city.
   _fetchWeather() async {
 
     DateTime now = DateTime.now();
@@ -74,6 +93,8 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     }
   }
 
+
+  /// Loads the rain data for the current city.
   void loadRainData() async {
     startLoadingWithDelay();
     String cityName = await _weatherService.getCurrentCity();
@@ -97,7 +118,14 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     }
   }
 
-  // Add this function to determine the climbing condition
+
+  /// Updates String values for every [rockType]
+  /// by assessing when it's last rained, and what [rockType] it is.
+  ///
+  /// Note: Some rockType need different times before it's safe to climb.
+  /// For example, Metamorphic is never unsafe to climb, but Sandstone can be.
+  ///
+  /// Possible options are "Don't climb", "Caution" and "Safe".
   String getClimbingCondition(String rockType) {
     if (rainData == null) {
       return "Checking...";
@@ -123,6 +151,9 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     }
   }
 
+
+  /// Updates the text color of getClimbingCondition depending on whether it returns
+  /// "Safe", "Caution", or "Don't climb."
   Color getConditionColor(String condition) {
     switch (condition) {
       case "Safe":
@@ -136,12 +167,27 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     }
   }
 
+
+  /// Called when a dependency of this [State] object changes.
+  ///
+  /// This method is overridden to call [_loadSettings] whenever the dependencies
+  /// of this widget change. It's typically used for actions that need to be executed
+  /// when the widget's environment changes (e.g., theme, locale, etc.).
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadSettings();
   }
 
+
+  /// Asynchronously loads the user's settings.
+  ///
+  /// This method retrieves the current unit type from shared preferences and updates the state.
+  /// It's used for initializing the widget with the user's preferred settings, for example,
+  /// when the widget is first created or when its dependencies change.
+  ///
+  /// This method uses the [SharedPreferences] package to access the device's persistent storage.
+  /// If no preference is found for 'unitType', it defaults to 'Metric'.
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -149,12 +195,8 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initApiKey();
-  }
 
+  /// Widget to tell the user whether it's rained in specific time intervals.
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
       return const Text("Loading rain data...",
@@ -193,6 +235,9 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     );
   }
 
+
+  /// Widget to take [rockType] and [rockInfo] to build a tile that tells the user
+  /// "Safe", "Caution", or "Don't climb" with a button for more information.
   Widget buildClimbingConditionTile(String rockType, String rockInfo) {
     String condition = getClimbingCondition(rockType);
     Color conditionColor = getConditionColor(condition);
@@ -251,6 +296,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -474,7 +520,12 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     );
   }
 
-  // Helper method to create a container for all climbing condition tiles
+
+  /// Helper method to build the UI for climbing condition tiles.
+  ///
+  /// [rockType] The type of the rock.
+  /// [rockInfo] The description of climbing conditions for the rock type.
+  /// Returns a widget that visually represents the climbing condition for a given rock type.
   Widget _climbingConditionsContainer() {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8),
@@ -501,9 +552,16 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     );
   }
 
-// Helper method to create a row for each climbing condition tile
+
+  /// Helper method to create a styled tile for displaying climbing conditions.
+  ///
+  /// [rockType] The type of the rock.
+  /// [rockInfo] The description of climbing conditions for the rock type.
+  /// Returns a widget that visually represents the climbing condition for a given rock type.
   Widget _styledClimbingConditionTile(String rockType, String rockInfo) {
     return buildClimbingConditionTile(
         rockType, rockInfo); // Directly return the tile
   }
+
+
 }

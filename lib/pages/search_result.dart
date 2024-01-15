@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
-import '../models/search_model.dart'; // Assuming you have a Search model
-import '../models/weather_model.dart';
-import 'package:boulderconds/services/weather_services.dart';
-import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:boulderconds/services/weather_services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../models/weather_model.dart';
 
 
+/// A stateful widget that displays the search results for a particular city.
+///
+/// This widget shows detailed weather information and rain data for the city specified.
 class SearchResult extends StatefulWidget {
   final String cityName;
 
@@ -15,6 +17,9 @@ class SearchResult extends StatefulWidget {
   @override
   State<SearchResult> createState() => _SearchResultPageState();
 }
+
+
+
 
 class _SearchResultPageState extends State<SearchResult> {
   final _weatherService = WeatherService();
@@ -25,6 +30,15 @@ class _SearchResultPageState extends State<SearchResult> {
   bool delayPassed = false;
 
 
+  /// Entry point for searchResult.
+  @override
+  void initState() {
+    super.initState();
+    _initApiKey();
+  }
+
+
+  /// Initializes the API key for the search service from secure storage.
   _initApiKey() async {
     String? apiKey = await _storage.read(key: 'openWeatherMapAPIKey');
     if (apiKey != null) {
@@ -37,6 +51,10 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Starts a loading process with a delay.
+  ///
+  /// This method is used to initiate a loading process for fetching data,
+  /// with a short delay to improve user experience.
   void startLoadingWithDelay() {
     setState(() {
       isLoading = true;
@@ -54,6 +72,10 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Fetches the weather information for the city.
+  ///
+  /// This method uses the weather service to retrieve weather data for the city
+  /// specified in the widget and updates the state with this data.
   _fetchWeather() async {
     try {
       final weather = await _weatherService.getWeather(widget.cityName);
@@ -65,6 +87,10 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
+
+  /// Loads the rain data for the city.
+  ///
+  /// This method fetches rain data for the city and updates the state accordingly.
   void loadRainData() async {
     startLoadingWithDelay();
     setState(() {
@@ -86,7 +112,14 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
-  // Add this function to determine the climbing condition
+
+  /// Updates String values for every [rockType]
+  /// by assessing when it's last rained, and what [rockType] it is.
+  ///
+  /// Note: Some rockType need different times before it's safe to climb.
+  /// For example, Metamorphic is never unsafe to climb, but Sandstone can be.
+  ///
+  /// Possible options are "Don't climb", "Caution" and "Safe".
   String getClimbingCondition(String rockType) {
     if (rainData == null) {
       return "Checking...";
@@ -112,6 +145,9 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
+
+  /// Updates the text color of getClimbingCondition depending on whether it returns
+  /// "Safe", "Caution", or "Don't climb."
   Color getConditionColor(String condition) {
     switch (condition) {
       case "Safe":
@@ -125,12 +161,8 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initApiKey();
-  }
 
+  /// Widget to tell the user whether it's rained in specific time intervals.
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
       return const Text("Loading rain data...",
@@ -170,6 +202,8 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Widget to take [rockType] and [rockInfo] to build a tile that tells the user
+  /// "Safe", "Caution", or "Don't climb" with a button for more information.
   Widget buildClimbingConditionTile(String rockType, String rockInfo) {
     String condition = getClimbingCondition(rockType);
     Color conditionColor = getConditionColor(condition);
@@ -448,7 +482,7 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
-  // Helper method to create a container for all climbing condition tiles
+  /// Helper method to create a container for all climbing condition tiles.
   Widget _climbingConditionsContainer() {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8), // Vertical spacing around the container
@@ -469,7 +503,7 @@ class _SearchResultPageState extends State<SearchResult> {
     );
   }
 
-// Helper method to create a row for each climbing condition tile
+  /// Helper method to create a row for each climbing condition tile
   Widget _styledClimbingConditionTile(String rockType, String rockInfo) {
     return buildClimbingConditionTile(rockType, rockInfo); // Directly return the tile
   }

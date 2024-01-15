@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/settings_service.dart';
 import '../services/weather_services.dart';
 
+
+/// A stateful widget for displaying and managing application settings.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
@@ -10,14 +13,28 @@ class SettingsPage extends StatefulWidget {
 }
 
 
+
 class _SettingsPageState extends State<SettingsPage> {
   String currentUnit = 'Metric'; // Default value
   final List<String> units = ['Imperial', 'Metric'];
   final SettingsService settingsService = SettingsService();
   final WeatherService _weatherService = WeatherService(); // Local instance
 
+
+  /// Entry point for settingsPage.
+  @override
+  void initState() {
+    super.initState();
+    _loadUnitType();
+  }
+
+
+  /// Handles changes to the unit type.
+  ///
+  /// When a new unit is selected, this method updates the state and persists the choice using [SettingsService].
+  /// [newUnit] The new unit type selected by the user.
   void _onUnitChanged(String newUnit) {
-    // Implement the logic that should happen when the unit changes
+    // TODO: Implement the logic that should happen when the unit changes
     // For example, update the WeatherService settings or notify other parts of the app
 
     setState(() {
@@ -27,17 +44,15 @@ class _SettingsPageState extends State<SettingsPage> {
     settingsService.updateUnitTypeFromSettings(currentUnit.toLowerCase());
   }
 
+
+  /// Loads the current unit type from settings.
+  ///
+  /// Retrieves the saved unit type from [SettingsService] and updates the state accordingly.
   void _loadUnitType() async {
     String savedUnit = await settingsService.getCurrentUnitType();
     setState(() {
       currentUnit = savedUnit == 'metric' ? 'Metric' : 'Imperial';
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUnitType();
   }
 
   @override
@@ -143,6 +158,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
 
+  /// Creates a row for a single setting.
+  ///
+  /// [label] The label of the setting.
+  /// [settingWidget] The widget used to change the setting.
+  /// Returns a widget displaying the setting row.
   Widget settingsRow(String label, Widget settingWidget) {
     return Container(
       padding: const EdgeInsets.all(8), // Padding inside the container
@@ -171,6 +191,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
 
+  /// Retrieves the temperature scale based on the current unit.
+  ///
+  /// Returns 'Fahrenheit' for Imperial and 'Celsius' for Metric units.
+
   String getTemperatureScale() {
     switch (currentUnit) {
       case 'Imperial':
@@ -182,6 +206,10 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+
+  /// Retrieves the wind speed scale based on the current unit.
+  ///
+  /// Returns 'Mph' for Imperial and 'Km/hr' for Metric units.
   String getWindSpeedScale() {
     switch (currentUnit) {
       case 'Imperial':
@@ -192,4 +220,6 @@ class _SettingsPageState extends State<SettingsPage> {
         return 'Celsius'; // Default case
     }
   }
+
+
 }

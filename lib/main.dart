@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
+
 import 'pages/weather_page.dart';
 import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 
+
+/// The entry point of the application.
 void main() {
   runApp(MyApp());
 }
 
+/// The main application widget.
+///
+/// This widget is the root of the application and controls the primary navigation.
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
+
+
+/// State for [MyApp].
+///
+/// This class holds the state for the [MyApp] widget, including the current selected index
+/// and the list of pages to display.
 class _MyAppState extends State<MyApp> {
   int _selectedIndex = 0;
   final PageStorageBucket bucket = PageStorageBucket();
@@ -34,6 +46,7 @@ class _MyAppState extends State<MyApp> {
       child: child,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +85,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+
+  /// Handles navigation bar item taps.
+  ///
+  /// Updates the state to reflect the selected index [index].
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
