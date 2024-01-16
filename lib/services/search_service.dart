@@ -46,8 +46,6 @@ class SearchService {
 
       return Search(result: formattedAddress);
     } else {
-      // Handle error, e.g., show an error message
-      print('Error: ${response.statusCode}');
       return null;
     }
   }
@@ -87,10 +85,10 @@ class SearchService {
           }
         }
       } else {
-        print('Error fetching location: ${response.statusCode}');
+        throw('Error fetching location: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error: $e');
+      throw('Error: $e');
     }
     return null; // Return null if city is not found or in case of any error
   }

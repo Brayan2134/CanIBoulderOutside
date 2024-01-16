@@ -121,11 +121,11 @@ class WeatherService{
           var dateTime = DateTime.parse(data['list'][i]['dt_txt']);
 
           // Check if the time is within the last 36 hours
-          if (dateTime.isAfter(DateTime.now().subtract(Duration(hours: 36)))) {
+          if (dateTime.isAfter(DateTime.now().subtract(const Duration(hours: 36)))) {
             if (weather == 'Rain') rainPeriods['last_36_hours'] = true;
           }
           // Check if the time is between 36 to 72 hours ago
-          else if (dateTime.isAfter(DateTime.now().subtract(Duration(hours: 72)))) {
+          else if (dateTime.isAfter(DateTime.now().subtract(const Duration(hours: 72)))) {
             if (weather == 'Rain') rainPeriods['36_to_72_hours'] = true;
           }
           // All other times are over 72 hours ago
@@ -138,13 +138,13 @@ class WeatherService{
 
       // If the openweathermap API doesnt connect properly, display error message.
       else {
-        print('weather_services checkRainPeriods: Request failed with status: ${response.statusCode}.');
+        // Request failed.
         return rainPeriods;
       }
     }
     // In the event that the try catch statement cannot be executed, produce an error.
     catch (e) {
-      print('weather_services checkRainPeriods: An error has occured with the try/catch statement?');
+      // An error has occured with the try/catch statement?
       return rainPeriods;
     }
   }

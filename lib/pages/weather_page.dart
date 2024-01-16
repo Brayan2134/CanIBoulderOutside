@@ -26,7 +26,6 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
   Weather? _weather;
   Map<String, bool>? rainData;
   bool isLoading = true;
-  String _currentUnit = 'Metric';
   final _storage = const FlutterSecureStorage();
   bool delayPassed = false;
 
@@ -62,7 +61,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
     });
 
     // Start a timer to manage loading state
-    Timer(Duration(seconds: 0), () {
+    Timer(const Duration(seconds: 0), () {
       if (isLoading) {
         setState(() {
           delayPassed = true;
@@ -88,7 +87,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
           _weather = weather;
         });
       } catch (e) {
-        print(e);
+        rethrow;
       }
     }
   }
@@ -110,11 +109,11 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
         isLoading = false; // Set to false once data is loaded
       });
     } catch (e) {
-      print('An error occurred: $e');
       setState(() {
         isLoading = false; // Also set to false if there's an error
       });
       // Handle error state
+      throw('An error occurred: $e');
     }
   }
 
@@ -133,7 +132,6 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
 
     bool rainedLast36 = rainData!['last_36_hours']!;
     bool rained36To72 = rainData!['36_to_72_hours']!;
-    bool rainedOver72 = rainData!['over_72_hours']!;
 
     // Determine the condition based on rock type and rain data
     switch (rockType) {
@@ -189,9 +187,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
   /// This method uses the [SharedPreferences] package to access the device's persistent storage.
   /// If no preference is found for 'unitType', it defaults to 'Metric'.
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _currentUnit = prefs.getString('unitType') ?? 'Metric';
     });
   }
 
@@ -200,7 +196,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
       return const Text("Loading rain data...",
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
           )
       );
@@ -278,7 +274,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
         children: [
           Text(
             rockType,
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
           Text(condition, style: TextStyle(color: conditionColor)),
         ],
@@ -288,7 +284,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
           padding: const EdgeInsets.all(8.0),
           child: RichText(
             text: TextSpan(
-              style: TextStyle(color: Colors.white), // Default text style
+              style: const TextStyle(color: Colors.white), // Default text style
               children: coloredTextSpans(rockInfo),
             ),
           ),
@@ -340,17 +336,17 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   // Define the widget to display based on the loading state
                                   Widget displayWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    displayWidget = Center(child: CircularProgressIndicator());
+                                    displayWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    displayWidget = CircularProgressIndicator();
+                                    displayWidget = const CircularProgressIndicator();
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     displayWidget = Text('Error: ${snapshot.error}');
@@ -371,7 +367,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: displayWidget,
@@ -391,19 +387,19 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   Widget temperatureWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    temperatureWidget = Center(child: CircularProgressIndicator());
+                                    temperatureWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     temperatureWidget = Text('Error: ${snapshot.error}');
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    temperatureWidget = CircularProgressIndicator();
+                                    temperatureWidget = const CircularProgressIndicator();
                                   } else {
                                     // Display the temperature with the unit
                                     temperatureWidget = Text(
@@ -421,7 +417,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: temperatureWidget,
@@ -432,19 +428,19 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                             const SizedBox(width: 16), // Spacing between the containers
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   Widget windSpeedWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    windSpeedWidget = Center(child: CircularProgressIndicator());
+                                    windSpeedWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     windSpeedWidget = Text('Error: ${snapshot.error}');
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    windSpeedWidget = CircularProgressIndicator();
+                                    windSpeedWidget = const CircularProgressIndicator();
                                   } else {
                                     // Determine the unit for wind speed
                                     String windUnit = (snapshot.data == 'F') ? 'MPH' : 'Kmh';
@@ -463,7 +459,7 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: windSpeedWidget,
@@ -484,10 +480,10 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
                             Expanded(
                               // Use Expanded if you want the container to take the full width
                               child: Container(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 // Padding inside the container
                                 decoration: BoxDecoration(
-                                  color: Color.fromRGBO(80, 82, 94, 1),
+                                  color: const Color.fromRGBO(80, 82, 94, 1),
                                   // Choose a suitable color
                                   borderRadius: BorderRadius.circular(
                                       12), // Rounded corners
@@ -528,12 +524,12 @@ class _WeatherPageState extends State<WeatherPage> with AutomaticKeepAliveClient
   /// Returns a widget that visually represents the climbing condition for a given rock type.
   Widget _climbingConditionsContainer() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       // Vertical spacing around the container
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       // Padding inside the container
       decoration: BoxDecoration(
-        color: Color.fromRGBO(80, 82, 94, 1), // Container color
+        color: const Color.fromRGBO(80, 82, 94, 1), // Container color
         borderRadius: BorderRadius.circular(12), // Rounded corners
         // Add any other styling you need for the container
       ),

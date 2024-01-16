@@ -21,11 +21,10 @@ class SearchPage extends StatefulWidget {
 
 
 class _SearchPageState extends State<SearchPage> {
-  Search? _search;
   final _searchService = SearchService();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Future<List<String>> _suggestions = Future.value([]);
-  final _storage = FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage();
 
 
   /// Entry point for the searchPage.
@@ -69,19 +68,18 @@ class _SearchPageState extends State<SearchPage> {
   void _performSearch(String query) async {
     try {
       Search? searchResult = await _searchService.search(query);
-      print('Search result: ${searchResult?.result}'); // Debug statement
 
       if (searchResult != null) {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => SearchResult(cityName: searchResult.result),
         ));
       } else {
-        print('Search result is null'); // Debug statement
-        // Optionally, show a dialog or a snackbar to inform the user??
+        throw ('Search result is null'); // Debug statement
+        // Optionally, show a dialog or a snack bar to inform the user??
       }
     } catch (e) {
-      print('Error during search: $e'); // Error handling
-      // Handle the error, maybe show a dialog or a snackbar??
+      throw ('Error during search: $e'); // Error handling
+      // Handle the error, maybe show a dialog or a snack bar??
     }
   }
 

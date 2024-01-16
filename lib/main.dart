@@ -27,7 +27,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// The entry point of the application.
 void main(){
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 
@@ -35,6 +35,8 @@ void main(){
 ///
 /// This widget is the root of the application and controls the primary navigation.
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -48,9 +50,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int _selectedIndex = 0;
   final List<Widget> _pages = [
-    WeatherPage(),
-    SearchPage(),
-    SettingsPage(),
+    const WeatherPage(),
+    const SearchPage(),
+    const SettingsPage(),
   ];
 
   @override

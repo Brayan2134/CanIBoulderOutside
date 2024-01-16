@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../services/settings_service.dart';
-import '../services/weather_services.dart';
 
 
 /// A stateful widget for displaying and managing application settings.
@@ -18,7 +17,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String currentUnit = 'Metric'; // Default value
   final List<String> units = ['Imperial', 'Metric'];
   final SettingsService settingsService = SettingsService();
-  final WeatherService _weatherService = WeatherService(); // Local instance
+// Local instance
 
 
   /// Entry point for settingsPage.
