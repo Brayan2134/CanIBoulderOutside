@@ -4,10 +4,10 @@ import 'pages/weather_page.dart';
 import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 
+
 /*
 * UPDATE API KEY MANUALLY:
 *
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
   Future<void> updateOpenWeatherMapApiKey() async {
