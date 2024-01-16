@@ -1,16 +1,15 @@
-# boulderconds
+# Can I Boulder?
 
-A new Flutter project.
+This is the repository for my final project for my CS4750 class at Cal Poly Pomona. 
 
-## Getting Started
+## Goals of this project (Problem to solve)
+  * Create an application that tells rock climbers what the current conditions are.
+  * Tells users what rocks are safe to climb on.
+  * Alert users of any NPS/State issued warnings (WIP)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Technologies Used
+  * Dart/flutter for UX/UI and logic.
+  * Geolocator: Get the known/last known location in the app.
+  * Geocoding: Convert street address to coordinates and vice versa.
+  * Shared Preferences: Save and manage global variables.
+  * Flutter Secure Storage: For API keys.
