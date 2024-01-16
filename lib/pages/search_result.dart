@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
-import '../models/search_model.dart'; // Assuming you have a Search model
-import '../models/weather_model.dart';
-import 'package:boulderconds/services/weather_services.dart';
-import 'package:boulderconds/services/search_service.dart'; // Assuming you have a SearchService
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:boulderconds/services/weather_services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../models/weather_model.dart';
 
 
+/// A stateful widget that displays the search results for a particular city.
+///
+/// This widget shows detailed weather information and rain data for the city specified.
 class SearchResult extends StatefulWidget {
   final String cityName;
 
@@ -15,6 +17,9 @@ class SearchResult extends StatefulWidget {
   @override
   State<SearchResult> createState() => _SearchResultPageState();
 }
+
+
+
 
 class _SearchResultPageState extends State<SearchResult> {
   final _weatherService = WeatherService();
@@ -25,6 +30,15 @@ class _SearchResultPageState extends State<SearchResult> {
   bool delayPassed = false;
 
 
+  /// Entry point for searchResult.
+  @override
+  void initState() {
+    super.initState();
+    _initApiKey();
+  }
+
+
+  /// Initializes the API key for the search service from secure storage.
   _initApiKey() async {
     String? apiKey = await _storage.read(key: 'openWeatherMapAPIKey');
     if (apiKey != null) {
@@ -37,6 +51,10 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Starts a loading process with a delay.
+  ///
+  /// This method is used to initiate a loading process for fetching data,
+  /// with a short delay to improve user experience.
   void startLoadingWithDelay() {
     setState(() {
       isLoading = true;
@@ -44,7 +62,7 @@ class _SearchResultPageState extends State<SearchResult> {
     });
 
     // Start a 3-second timer
-    Timer(Duration(seconds: 0), () {
+    Timer(const Duration(seconds: 0), () {
       if (isLoading) {
         setState(() {
           delayPassed = true;
@@ -54,6 +72,10 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Fetches the weather information for the city.
+  ///
+  /// This method uses the weather service to retrieve weather data for the city
+  /// specified in the widget and updates the state with this data.
   _fetchWeather() async {
     try {
       final weather = await _weatherService.getWeather(widget.cityName);
@@ -61,10 +83,14 @@ class _SearchResultPageState extends State<SearchResult> {
         _weather = weather;
       });
     } catch (e) {
-      print(e);
+      rethrow;
     }
   }
 
+
+  /// Loads the rain data for the city.
+  ///
+  /// This method fetches rain data for the city and updates the state accordingly.
   void loadRainData() async {
     startLoadingWithDelay();
     setState(() {
@@ -78,15 +104,21 @@ class _SearchResultPageState extends State<SearchResult> {
         isLoading = false; // Set to false once data is loaded
       });
     } catch (e) {
-      print('An error occurred: $e');
       setState(() {
         isLoading = false; // Also set to false if there's an error
       });
-      // Handle error state
+      throw('An error occurred: $e');
     }
   }
 
-  // Add this function to determine the climbing condition
+
+  /// Updates String values for every [rockType]
+  /// by assessing when it's last rained, and what [rockType] it is.
+  ///
+  /// Note: Some rockType need different times before it's safe to climb.
+  /// For example, Metamorphic is never unsafe to climb, but Sandstone can be.
+  ///
+  /// Possible options are "Don't climb", "Caution" and "Safe".
   String getClimbingCondition(String rockType) {
     if (rainData == null) {
       return "Checking...";
@@ -112,6 +144,9 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
+
+  /// Updates the text color of getClimbingCondition depending on whether it returns
+  /// "Safe", "Caution", or "Don't climb."
   Color getConditionColor(String condition) {
     switch (condition) {
       case "Safe":
@@ -125,16 +160,12 @@ class _SearchResultPageState extends State<SearchResult> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initApiKey();
-  }
 
+  /// Widget to tell the user whether it's rained in specific time intervals.
   Widget _buildRainDataDisplay() {
     if (rainData == null) {
       return const Text("Loading rain data...",
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
           )
       );
@@ -170,6 +201,8 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
+  /// Widget to take [rockType] and [rockInfo] to build a tile that tells the user
+  /// "Safe", "Caution", or "Don't climb" with a button for more information.
   Widget buildClimbingConditionTile(String rockType, String rockInfo) {
     String condition = getClimbingCondition(rockType);
     Color conditionColor = getConditionColor(condition);
@@ -208,7 +241,7 @@ class _SearchResultPageState extends State<SearchResult> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(rockType, style: TextStyle(color: Colors.white),),
+          Text(rockType, style: const TextStyle(color: Colors.white),),
           Text(condition, style: TextStyle(color: conditionColor)),
         ],
       ),
@@ -217,7 +250,7 @@ class _SearchResultPageState extends State<SearchResult> {
           padding: const EdgeInsets.all(8.0),
           child: RichText(
             text: TextSpan(
-              style: TextStyle(color: Colors.white), // Default text style
+              style: const TextStyle(color: Colors.white), // Default text style
               children: coloredTextSpans(rockInfo),
             ),
           ),
@@ -225,6 +258,7 @@ class _SearchResultPageState extends State<SearchResult> {
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -270,17 +304,17 @@ class _SearchResultPageState extends State<SearchResult> {
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   // Define the widget to display based on the loading state
                                   Widget displayWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    displayWidget = Center(child: CircularProgressIndicator());
+                                    displayWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    displayWidget = CircularProgressIndicator();
+                                    displayWidget = const CircularProgressIndicator();
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     displayWidget = Text('Error: ${snapshot.error}');
@@ -301,7 +335,7 @@ class _SearchResultPageState extends State<SearchResult> {
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: displayWidget,
@@ -320,19 +354,19 @@ class _SearchResultPageState extends State<SearchResult> {
                           children: <Widget>[
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   Widget temperatureWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    temperatureWidget = Center(child: CircularProgressIndicator());
+                                    temperatureWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     temperatureWidget = Text('Error: ${snapshot.error}');
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    temperatureWidget = CircularProgressIndicator();
+                                    temperatureWidget = const CircularProgressIndicator();
                                   } else {
                                     // Display the temperature with the unit
                                     temperatureWidget = Text(
@@ -350,7 +384,7 @@ class _SearchResultPageState extends State<SearchResult> {
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: temperatureWidget,
@@ -361,19 +395,19 @@ class _SearchResultPageState extends State<SearchResult> {
                             const SizedBox(width: 16), // Spacing between the containers
                             Expanded(
                               child: FutureBuilder<String>(
-                                future: _weatherService?.getUnitType,
+                                future: _weatherService.getUnitType,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   Widget windSpeedWidget;
 
                                   if (isLoading && delayPassed) {
                                     // Display a loading indicator if still loading and delay has passed
-                                    windSpeedWidget = Center(child: CircularProgressIndicator());
+                                    windSpeedWidget = const Center(child: CircularProgressIndicator());
                                   } else if (snapshot.hasError) {
                                     // Handle the error
                                     windSpeedWidget = Text('Error: ${snapshot.error}');
                                   } else if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Display a loading indicator while waiting for Future to resolve
-                                    windSpeedWidget = CircularProgressIndicator();
+                                    windSpeedWidget = const CircularProgressIndicator();
                                   } else {
                                     // Determine the unit for wind speed
                                     String windUnit = (snapshot.data == 'F') ? 'MPH' : 'Kmh';
@@ -392,7 +426,7 @@ class _SearchResultPageState extends State<SearchResult> {
                                   return Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Color.fromRGBO(80, 82, 94, 1),
+                                      color: const Color.fromRGBO(80, 82, 94, 1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: windSpeedWidget,
@@ -412,10 +446,10 @@ class _SearchResultPageState extends State<SearchResult> {
                             Expanded(
                               // Use Expanded if you want the container to take the full width
                               child: Container(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 // Padding inside the container
                                 decoration: BoxDecoration(
-                                  color: Color.fromRGBO(80, 82, 94, 1),
+                                  color: const Color.fromRGBO(80, 82, 94, 1),
                                   // Choose a suitable color
                                   borderRadius: BorderRadius.circular(
                                       12), // Rounded corners
@@ -448,13 +482,13 @@ class _SearchResultPageState extends State<SearchResult> {
   }
 
 
-  // Helper method to create a container for all climbing condition tiles
+  /// Helper method to create a container for all climbing condition tiles.
   Widget _climbingConditionsContainer() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 8), // Vertical spacing around the container
-      padding: EdgeInsets.all(8), // Padding inside the container
+      margin: const EdgeInsets.symmetric(vertical: 8), // Vertical spacing around the container
+      padding: const EdgeInsets.all(8), // Padding inside the container
       decoration: BoxDecoration(
-        color: Color.fromRGBO(80, 82, 94, 1), // Container color
+        color: const Color.fromRGBO(80, 82, 94, 1), // Container color
         borderRadius: BorderRadius.circular(12), // Rounded corners
         // Add any other styling you need for the container
       ),
@@ -469,9 +503,11 @@ class _SearchResultPageState extends State<SearchResult> {
     );
   }
 
-// Helper method to create a row for each climbing condition tile
+
+  /// Helper method to create a row for each climbing condition tile
   Widget _styledClimbingConditionTile(String rockType, String rockInfo) {
     return buildClimbingConditionTile(rockType, rockInfo); // Directly return the tile
   }
+
 
 }
